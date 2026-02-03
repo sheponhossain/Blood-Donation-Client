@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Droplets, Upload, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import { AuthContext } from '../providers/AuthProvider';
 
 const Register = () => {
+  const { createUser, updateUserProfile } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [divisions, setDivisions] = useState([]);
   const [allDistricts, setAllDistricts] = useState([]);
   const [filteredDistricts, setFilteredDistricts] = useState([]);
-  const [allUpazilas, setAllUpazilas] = useState([]);
-  const [filteredUpazilas, setFilteredUpazilas] = useState([]);
 
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,26 +24,19 @@ const Register = () => {
     formState: { errors },
   } = useForm();
 
-  // Watch fields for dependent dropdowns
   const selectedDivisionId = watch('division');
   const selectedDistrictId = watch('district');
+  const avatarFile = watch('avatar');
 
-  // Load Initial Data
   useEffect(() => {
     fetch('/divisions.json')
       .then((res) => res.json())
       .then((data) => setDivisions(data));
-
     fetch('/districts.json')
       .then((res) => res.json())
       .then((data) => setAllDistricts(data));
-
-    fetch('/upazilas.json')
-      .then((res) => res.json())
-      .then((data) => setAllUpazilas(data));
   }, []);
 
-  // Filter Districts when Division changes
   useEffect(() => {
     if (selectedDivisionId) {
       const filtered = allDistricts.filter(
@@ -52,56 +48,89 @@ const Register = () => {
     }
   }, [selectedDivisionId, allDistricts]);
 
-  // Filter Upazilas when District changes
-  useEffect(() => {
-    if (selectedDistrictId) {
-      const filtered = allUpazilas.filter(
-        (u) => u.district_id === selectedDistrictId
-      );
-      setFilteredUpazilas(filtered);
-    } else {
-      setFilteredUpazilas([]);
-    }
-  }, [selectedDistrictId, allUpazilas]);
-
   const onSubmit = async (data) => {
+    if (data.password !== data.confirmPassword) {
+      return Swal.fire('Error', 'Passwords do not match!', 'error');
+    }
+
     setLoading(true);
-    // ... logic for ImageBB and User Creation (as per your previous code)
-    console.log('Form Data:', data);
-    setLoading(false);
+
+    try {
+      // 1. Image Upload Logic (Direct Key Use korchi jate error na ashe)
+      const imageFile = data.avatar[0];
+      const formData = new FormData();
+      formData.append('image', imageFile);
+
+      // JODI .env KAAL NA KORE TOBE EIKHANE DIRECT KEY BOSHAO
+      const imgBBKey =
+        import.meta.env.VITE_IMGBB_API_KEY ||
+        '02ede86040a806d18640942ecc23f6cc;';
+      console.log(imgBBKey);
+      const url = `https://api.imgbb.com/1/upload?key=${imgBBKey}`;
+
+      const response = await axios.post(url, formData);
+
+      if (response.data.success) {
+        const photoURL = response.data.data.display_url;
+
+        // 2. Firebase Creation
+        await createUser(data.email, data.password);
+        await updateUserProfile(data.name, photoURL);
+
+        // 3. Prepare Final Object
+        const newUser = {
+          name: data.name,
+          email: data.email,
+          avatar: photoURL,
+          bloodGroup: data.bloodGroup,
+          division: divisions.find((d) => d.id === data.division)?.name,
+          district: allDistricts.find((d) => d.id === data.district)?.name,
+          status: 'active',
+          role: 'donor',
+        };
+
+        console.log('Final Data:', newUser);
+        // Backend Post Request logic eikhane hobe pore...
+
+        Swal.fire('Success', 'Registration Successful!', 'success');
+        navigate('/');
+      }
+    } catch (error) {
+      Swal.fire(
+        'Error',
+        error.response?.data?.error?.message || error.message,
+        'error'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
-        {/* Header */}
         <div className="text-center">
           <Droplets className="mx-auto h-12 w-12 text-red-600" />
           <h2 className="mt-4 text-3xl font-extrabold text-gray-900">
-            Create your account
+            Create account
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join our community and start saving lives.
-          </p>
         </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Full Name
             </label>
             <input
               {...register('name', { required: true })}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
               placeholder="Enter your name"
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Email Address
@@ -109,61 +138,63 @@ const Register = () => {
             <input
               type="email"
               {...register('email', { required: true })}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
               placeholder="email@example.com"
             />
           </div>
 
-          {/* Avatar Upload */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Profile Picture
             </label>
-            <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
+              {avatarFile && avatarFile[0] ? (
+                <img
+                  src={URL.createObjectURL(avatarFile[0])}
+                  className="h-full w-full object-cover"
+                  alt="preview"
+                />
+              ) : (
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 text-center">
                     Click to upload avatar
                   </p>
                 </div>
-                <input
-                  type="file"
-                  {...register('avatar', { required: true })}
-                  className="hidden"
-                />
-              </label>
-            </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                {...register('avatar', { required: true })}
+                className="hidden"
+              />
+            </label>
           </div>
 
-          {/* Blood Group */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Blood Group
             </label>
             <select
               {...register('bloodGroup', { required: true })}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-white"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg bg-white outline-none"
             >
               <option value="">Select Group</option>
-              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(
-                (group) => (
-                  <option key={group} value={group}>
-                    {group}
-                  </option>
-                )
-              )}
+              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Division */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Division
             </label>
             <select
               {...register('division', { required: true })}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-white"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg bg-white outline-none"
             >
               <option value="">Select Division</option>
               {divisions.map((div) => (
@@ -174,7 +205,6 @@ const Register = () => {
             </select>
           </div>
 
-          {/* District */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               District
@@ -182,7 +212,7 @@ const Register = () => {
             <select
               {...register('district', { required: true })}
               disabled={!selectedDivisionId}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-white disabled:bg-gray-100"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg bg-white disabled:bg-gray-100 outline-none"
             >
               <option value="">Select District</option>
               {filteredDistricts.map((d) => (
@@ -193,7 +223,6 @@ const Register = () => {
             </select>
           </div>
 
-          {/* Password */}
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700">
               Password
@@ -201,7 +230,7 @@ const Register = () => {
             <input
               type={showPass ? 'text' : 'password'}
               {...register('password', { required: true, minLength: 6 })}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
             />
             <button
               type="button"
@@ -212,19 +241,29 @@ const Register = () => {
             </button>
           </div>
 
-          {/* Submit Button */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              {...register('confirmPassword', { required: true })}
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
+            />
+          </div>
+
           <div className="md:col-span-2">
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-lg hover:bg-red-700 transition shadow-lg shadow-red-200 disabled:bg-gray-400"
             >
-              {loading ? 'Registering...' : 'Sign Up'}
+              {loading ? 'Processing...' : 'Sign Up'}
             </button>
           </div>
         </form>
 
-        <p className="text-center text-gray-600 mt-4">
+        <p className="text-center text-gray-600">
           Already have an account?{' '}
           <Link to="/login" className="text-red-600 font-bold hover:underline">
             Login here
