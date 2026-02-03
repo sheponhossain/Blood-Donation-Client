@@ -6,8 +6,9 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth';
-import { auth } from '../api/firebase.config';
+
 import axios from 'axios';
+import { auth } from '../firebase/firebase.config';
 
 export const AuthContext = createContext(null);
 
