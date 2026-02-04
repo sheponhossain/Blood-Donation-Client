@@ -1,3 +1,4 @@
+import React, { useState } from 'react'; // useState যোগ করা হয়েছে
 import { NavLink, Outlet } from 'react-router';
 import {
   FaHome,
@@ -7,22 +8,33 @@ import {
   FaUsers,
   FaDonate,
   FaHandHoldingHeart,
+  FaExchangeAlt,
 } from 'react-icons/fa';
 
 const DashboardLayout = () => {
-  const role = 'admin';
+  // ১. Fake User State: এখান থেকে আপনি রোল কন্ট্রোল করতে পারবেন
+  const [user, setUser] = useState({
+    name: 'Test User',
+    role: 'admin', // ডিফল্ট রোল
+  });
+
+  // রোল পরিবর্তন করার ফাংশন
+  const toggleRole = (newRole) => {
+    setUser({ ...user, role: newRole });
+  };
 
   return (
-    // min-h-screen নিশ্চিত করে যে পুরো উচ্চতা নিবে
     <div className="drawer lg:drawer-open min-h-screen">
       <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
 
-      {/* drawer-content এ flex-1 যোগ করা হয়েছে যাতে এটি বাকি সবটুকু জায়গা নেয় */}
       <div className="drawer-content flex flex-col flex-1 bg-gray-50">
-        {/* Mobile Navbar */}
-        <nav className="navbar w-full bg-white border-b lg:hidden px-4">
-          <div className="flex-none">
-            <label htmlFor="my-drawer-4" className="btn btn-square btn-ghost">
+        {/* Mobile & Role Switcher Navbar */}
+        <nav className="navbar w-full bg-white border-b px-4 flex justify-between">
+          <div className="flex items-center">
+            <label
+              htmlFor="my-drawer-4"
+              className="btn btn-square btn-ghost lg:hidden"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -37,13 +49,33 @@ const DashboardLayout = () => {
                 ></path>
               </svg>
             </label>
+            <div className="px-2 font-bold text-red-600 hidden md:block">
+              BloodFlow Dashboard
+            </div>
           </div>
-          <div className="flex-1 px-2 font-bold text-red-600">
-            BloodFlow Dashboard
+
+          {/* ২. Role Switcher UI: এটি শুধু ডেভেলপমেন্টের সময় চেক করার জন্য */}
+          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <span className="text-[10px] font-black uppercase px-2 text-slate-500 flex items-center gap-1">
+              <FaExchangeAlt size={10} /> Role:
+            </span>
+            {['admin', 'donor', 'volunteer'].map((r) => (
+              <button
+                key={r}
+                onClick={() => toggleRole(r)}
+                className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                  user.role === r
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-white'
+                }`}
+              >
+                {r}
+              </button>
+            ))}
           </div>
         </nav>
 
-        {/* Main Page Content - এখানে w-full নিশ্চিত করা হয়েছে */}
+        {/* Main Page Content */}
         <div className="p-4 md:p-8 w-full min-h-screen">
           <Outlet />
         </div>
@@ -53,7 +85,7 @@ const DashboardLayout = () => {
       <div className="drawer-side z-40">
         <label htmlFor="my-drawer-4" className="drawer-overlay"></label>
         <div className="flex min-h-full flex-col w-64 bg-white border-r text-base-content">
-          <div className="p-6 text-2xl font-bold text-red-600 border-b">
+          <div className="p-6 text-2xl font-bold text-red-600 border-b flex items-center gap-2">
             🩸 BloodFlow
           </div>
 
@@ -62,22 +94,27 @@ const DashboardLayout = () => {
               <NavLink
                 to="/dashboard/profile"
                 className={({ isActive }) =>
-                  isActive ? 'bg-red-500 text-white' : ''
+                  isActive ? 'bg-red-600 text-white' : ''
                 }
               >
                 <FaUser className="size-4" /> Profile
               </NavLink>
             </li>
 
-            <div className="divider opacity-50 uppercase text-xs">Menu</div>
+            <div className="divider opacity-50 uppercase text-[10px] font-bold tracking-widest text-slate-400">
+              {user.role} Menu
+            </div>
 
-            {(role === 'donor' || role === 'admin' || role === 'volunteer') && (
+            {/* কন্ডিশনাল রেন্ডারিং এখন user.role অনুযায়ী হবে */}
+            {(user.role === 'donor' ||
+              user.role === 'admin' ||
+              user.role === 'volunteer') && (
               <li>
                 <NavLink
                   to="/dashboard"
                   end
                   className={({ isActive }) =>
-                    isActive ? 'bg-red-500 text-white' : ''
+                    isActive ? 'bg-red-600 text-white' : ''
                   }
                 >
                   <FaHome className="size-4" /> Dashboard Home
@@ -85,66 +122,106 @@ const DashboardLayout = () => {
               </li>
             )}
 
-            {role === 'donor' && (
+            {user.role === 'donor' && (
               <>
                 <li>
-                  <NavLink to="/dashboard/my-donation-requests">
-                    <FaList /> My Requests
+                  <NavLink
+                    to="/dashboard/my-donation-requests"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaList className="size-4" /> My Requests
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink to="/dashboard/create-donation-request">
-                    <FaPlusCircle /> Create Request
+                  <NavLink
+                    to="/dashboard/create-donation-request"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaPlusCircle className="size-4" /> Create Request
                   </NavLink>
                 </li>
               </>
             )}
 
-            {role === 'volunteer' && (
+            {user.role === 'volunteer' && (
               <>
                 <li>
-                  <NavLink to="/dashboard/all-blood-donation-request">
-                    <FaList /> All Requests
+                  <NavLink
+                    to="/dashboard/all-blood-donation-request"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaList className="size-4" /> All Requests
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink to="/dashboard/content-management">
-                    <FaHandHoldingHeart /> Content
+                  <NavLink
+                    to="/dashboard/content-management"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaHandHoldingHeart className="size-4" /> Content
                   </NavLink>
                 </li>
               </>
             )}
 
-            {role === 'admin' && (
+            {user.role === 'admin' && (
               <>
                 <li>
-                  <NavLink to="/dashboard/all-users">
-                    <FaUsers /> All Users
+                  <NavLink
+                    to="/dashboard/all-users"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaUsers className="size-4" /> All Users
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink to="/dashboard/all-blood-donation-request">
-                    <FaList /> All Requests
+                  <NavLink
+                    to="/dashboard/all-blood-donation-request"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaList className="size-4" /> All Requests
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink to="/dashboard/content-management">
-                    <FaHandHoldingHeart /> Content
+                  <NavLink
+                    to="/dashboard/content-management"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaHandHoldingHeart className="size-4" /> Content
                   </NavLink>
                 </li>
               </>
             )}
 
             <li>
-              <NavLink to="/dashboard/funding">
-                <FaDonate /> Funding
+              <NavLink
+                to="/dashboard/funding"
+                className={({ isActive }) =>
+                  isActive ? 'bg-red-600 text-white' : ''
+                }
+              >
+                <FaDonate className="size-4" /> Funding
               </NavLink>
             </li>
 
             <div className="mt-auto border-t pt-4">
               <li>
-                <NavLink to="/" className="text-gray-500">
-                  <FaHome /> Back to Home
+                <NavLink to="/" className="text-slate-500 hover:text-red-600">
+                  <FaHome className="size-4" /> Back to Home
                 </NavLink>
               </li>
             </div>

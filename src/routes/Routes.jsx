@@ -11,11 +11,12 @@ import Banner from '../components/home/Banner';
 import DonationRequest from '../pages/DonationRequest';
 import FundingPage from '../dashboard/funding/FundingPage';
 import Payment from '../dashboard/funding/Payment';
-import AdminDashboard from '../dashboard/AdminDashboard/AdminDashboard';
+import AdminDashboard from '../dashboard/AdminDashboard/AdminDashboardHome';
 import AllUsers from '../dashboard/AdminDashboard/AllUsers';
-import AllDonationRequests from '../dashboard/AdminDashboard/AllDonationRequests';
+import AllDonationRequests from '../dashboard/AdminDashboard/AllBloodDonationRequests';
 import ContentManagement from '../dashboard/AdminDashboard/ContentManagement';
 import Funding from '../dashboard/AdminDashboard/Funding';
+import Features from '../components/home/Features';
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: 'donation-requests', // Nuton Route
         element: <DonationRequest />,
+      },
+      {
+        path: 'Features', // Nuton Route
+        element: <Features />,
       },
       {
         path: 'search',
