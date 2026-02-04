@@ -56,51 +56,52 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // 1. Image Upload Logic (Direct Key Use korchi jate error na ashe)
       const imageFile = data.avatar[0];
+      if (!imageFile) {
+        setLoading(false);
+        return Swal.fire('Error', 'Please select a profile picture', 'error');
+      }
+
       const formData = new FormData();
       formData.append('image', imageFile);
-
-      // JODI .env KAAL NA KORE TOBE EIKHANE DIRECT KEY BOSHAO
-      const imgBBKey =
-        import.meta.env.VITE_IMGBB_API_KEY ||
-        '02ede86040a806d18640942ecc23f6cc;';
-      console.log(imgBBKey);
+      const imgBBKey = '02ede86040a806d18640942ecc23f6cc';
       const url = `https://api.imgbb.com/1/upload?key=${imgBBKey}`;
-
-      const response = await axios.post(url, formData);
+      const response = await axios.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       if (response.data.success) {
         const photoURL = response.data.data.display_url;
-
-        // 2. Firebase Creation
         await createUser(data.email, data.password);
         await updateUserProfile(data.name, photoURL);
 
-        // 3. Prepare Final Object
         const newUser = {
           name: data.name,
           email: data.email,
           avatar: photoURL,
           bloodGroup: data.bloodGroup,
-          division: divisions.find((d) => d.id === data.division)?.name,
-          district: allDistricts.find((d) => d.id === data.district)?.name,
+          division: divisions.find(
+            (d) => String(d.id) === String(data.division)
+          )?.name,
+          district: allDistricts.find(
+            (d) => String(d.id) === String(data.district)
+          )?.name,
           status: 'active',
           role: 'donor',
         };
 
-        console.log('Final Data:', newUser);
-        // Backend Post Request logic eikhane hobe pore...
+        console.log('User registered successfully:', newUser);
 
         Swal.fire('Success', 'Registration Successful!', 'success');
         navigate('/');
       }
     } catch (error) {
-      Swal.fire(
-        'Error',
-        error.response?.data?.error?.message || error.message,
-        'error'
-      );
+      console.error('Full Error Object:', error);
+      const errorMessage =
+        error.response?.data?.error?.message || error.message;
+      Swal.fire('Error', `Upload failed: ${errorMessage}`, 'error');
     } finally {
       setLoading(false);
     }

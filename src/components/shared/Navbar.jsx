@@ -8,15 +8,15 @@ import {
   LogOut,
   LayoutDashboard,
 } from 'lucide-react';
+import Logo from './Logo';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Simulation: Replace with your AuthContext logic
   const user = {
     displayName: 'John Doe',
-    photoURL: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', // ImageBB link hobe
+    photoURL: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
   };
 
   const navLinks = [
@@ -35,17 +35,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           {/* Logo Section */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="bg-red-100 p-2 rounded-lg">
-                <Droplets className="w-8 h-8 text-red-600" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight text-gray-800">
-                Life<span className="text-red-600">Flow</span>
-              </span>
-            </Link>
-          </div>
-
+          <Logo />
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (

@@ -2,13 +2,13 @@ import { createBrowserRouter } from 'react-router';
 import Home from '../pages/Home';
 import MainLayout from '../Layouts/MainLayout';
 import ErrorPage from '../components/shared/ErrorPage';
-import DonationRequests from '../dashboard/donor/DonationRequests';
 import SearchPage from '../pages/SearchPage';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
-import DashboardLayout from '../components/Dashboard/DashboardLayout';
-import DonorDashboardHome from '../dashboard/donor/DonorDashboardHome';
-import Profile from '../dashboard/common/Profile';
+import DashboardLayout from '../Layouts/DashboardLayout/DashboardLayout';
+import DonorDashboardHome from '../Layouts/DashboardLayout/DonorDashboardHome';
+import Profile from '../pages/Profile';
+import Banner from '../components/home/Banner';
 
 export const router = createBrowserRouter([
   {
@@ -21,12 +21,12 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'donation-requests',
-        element: <DonationRequests />,
-      },
-      {
         path: 'search',
         element: <SearchPage />,
+      },
+      {
+        path: 'banner',
+        element: <Banner />,
       },
     ],
   },
