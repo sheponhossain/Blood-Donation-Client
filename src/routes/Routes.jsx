@@ -10,6 +10,7 @@ import DonorDashboardHome from '../Layouts/DashboardLayout/DonorDashboardHome';
 import Profile from '../pages/Profile';
 import Banner from '../components/home/Banner';
 import DonationRequest from '../pages/DonationRequest';
+import FundingPage from '../dashboard/funding/FundingPage';
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
       {
         path: 'banner',
         element: <Banner />,
+      },
+      {
+        path: 'funding',
+        element: <FundingPage />,
       },
     ],
   },

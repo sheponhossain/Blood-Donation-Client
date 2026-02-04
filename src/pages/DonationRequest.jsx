@@ -180,9 +180,43 @@ const DonationRequest = () => {
                     onChange={(date) => setStartDate(date)}
                     className="w-full px-5 py-4 bg-red-50 border border-red-100 rounded-2xl focus:ring-2 focus:ring-red-500 text-red-700 font-bold outline-none transition-all cursor-pointer shadow-inner"
                     dateFormat="MM/dd/yyyy"
-                    // Tailwind base classes for the calendar popup
-                    calendarClassName="blood-calendar shadow-2xl border-none rounded-2xl overflow-hidden"
-                    dayClassName={(date) => 'rounded-full hover:!bg-red-100'}
+                    renderCustomHeader={({
+                      date,
+                      decreaseMonth,
+                      increaseMonth,
+                      prevMonthButtonDisabled,
+                      nextMonthButtonDisabled,
+                    }) => (
+                      <div className="bg-red-600 p-3 flex justify-between items-center rounded-t-xl">
+                        <button
+                          onClick={decreaseMonth}
+                          disabled={prevMonthButtonDisabled}
+                          type="button"
+                          className="text-white hover:bg-red-700 px-2 rounded-lg transition-colors"
+                        >
+                          {'<'}
+                        </button>
+                        <span className="text-white font-bold text-lg italic">
+                          {date.toLocaleString('default', { month: 'long' })}{' '}
+                          {date.getFullYear()}
+                        </span>
+                        <button
+                          onClick={increaseMonth}
+                          disabled={nextMonthButtonDisabled}
+                          type="button"
+                          className="text-white hover:bg-red-700 px-2 rounded-lg transition-colors"
+                        >
+                          {'>'}
+                        </button>
+                      </div>
+                    )}
+                    calendarClassName="!border-none shadow-2xl rounded-2xl overflow-hidden bg-white"
+                    dayClassName={(date) =>
+                      date.getDate() === startDate.getDate() &&
+                      date.getMonth() === startDate.getMonth()
+                        ? 'bg-red-600 !text-white rounded-full'
+                        : 'hover:bg-red-100 rounded-full transition-all'
+                    }
                   />
                   <FaCalendarAlt className="absolute right-5 top-1/2 -translate-y-1/2 text-red-500 pointer-events-none" />
                 </div>
