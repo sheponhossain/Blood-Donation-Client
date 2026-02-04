@@ -9,6 +9,7 @@ import DashboardLayout from '../Layouts/DashboardLayout/DashboardLayout';
 import DonorDashboardHome from '../Layouts/DashboardLayout/DonorDashboardHome';
 import Profile from '../pages/Profile';
 import Banner from '../components/home/Banner';
+import DonationRequest from '../pages/DonationRequest';
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
       {
         path: '/',
         element: <Home />,
+      },
+      {
+        path: 'donation-requests', // Nuton Route
+        element: <DonationRequest />,
       },
       {
         path: 'search',
