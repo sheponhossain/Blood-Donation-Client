@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import {
   FaPaperPlane,
   FaHospital,
   FaMapMarkerAlt,
   FaCalendarAlt,
 } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const DonationRequest = () => {
   const [allDivisions, setAllDivisions] = useState([]);
   const [allDistricts, setAllDistricts] = useState([]);
   const [filteredDistricts, setFilteredDistricts] = useState([]);
   const [selectedDivisionId, setSelectedDivisionId] = useState('');
+  const [startDate, setStartDate] = useState(new Date());
 
   useEffect(() => {
     fetch('/divisions.json')
@@ -24,113 +28,120 @@ const DonationRequest = () => {
   const handleDivisionChange = (e) => {
     const divId = e.target.value;
     setSelectedDivisionId(divId);
-    const filtered = allDistricts.filter((dis) => dis.division_id === divId);
-    setFilteredDistricts(filtered);
+    setFilteredDistricts(
+      allDistricts.filter((dis) => dis.division_id === divId)
+    );
+  };
+
+  // 🔥 SweetAlert2 Success Logic
+  const handlePostRequest = (e) => {
+    e.preventDefault();
+
+    Swal.fire({
+      title: 'Success!',
+      text: 'Your blood request has been posted successfully.',
+      icon: 'success',
+      confirmButtonText: 'Great!',
+      confirmButtonColor: '#e11d48', // Blood Red
+      iconColor: '#e11d48',
+      background: '#ffffff',
+      customClass: {
+        popup: 'rounded-[30px]',
+        title: 'text-2xl font-bold text-gray-800',
+        confirmButton: 'rounded-xl px-8 py-3 font-bold italic',
+      },
+    });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-4 relative overflow-hidden">
-      {/* Soft Heart/Dot Background Pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(#ef4444 1.5px, transparent 1.5px)`,
-          backgroundSize: '30px 30px',
-        }}
-      ></div>
+    <div className="min-h-screen bg-[#f8fafc] py-16 px-4 relative overflow-hidden">
+      {/* Background Heart Pattern */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#e11d48_1.5px,transparent_1.5px)] [background-size:25px_25px]"></div>
 
-      <div className="max-w-4xl mx-auto relative group">
-        {/* Curved Header Section with Red Gradient */}
-        <div className="bg-gradient-to-br from-red-600 via-red-500 to-rose-500 rounded-t-[50px] pt-12 pb-20 px-10 text-center shadow-xl transition-all duration-500 group-hover:shadow-red-200/50">
-          <h2 className="text-4xl md:text-5xl font-black text-white italic tracking-tight drop-shadow-md">
+      <div className="max-w-4xl mx-auto relative">
+        {/* Header - Red Gradient */}
+        <div className="bg-gradient-to-r from-red-600 to-rose-500 rounded-t-[40px] pt-12 pb-24 px-10 text-center shadow-lg">
+          <h2 className="text-4xl md:text-5xl font-bold text-white italic tracking-tight">
             Create Blood Request
           </h2>
-          <p className="mt-3 text-red-100 font-medium text-lg italic opacity-90">
-            Every drop counts. Post your emergency now.
+          <p className="mt-2 text-red-50 text-lg opacity-80 italic">
+            Fill out the form below to post an emergency blood request.
           </p>
         </div>
 
-        {/* Premium Form Card */}
-        <div className="bg-white rounded-[50px] shadow-2xl p-8 md:p-14 -mt-12 border border-white/50 backdrop-blur-sm">
-          <form className="space-y-10">
-            {/* Row 1: Names & Blood Group */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* Form Card */}
+        <div className="bg-white rounded-[40px] shadow-2xl p-8 md:p-14 -mt-16 border border-white relative z-10">
+          <form onSubmit={handlePostRequest} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Recipient Name
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. John Doe"
-                  className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-red-500 focus:bg-white outline-none transition-all shadow-inner placeholder:text-gray-300"
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition-all shadow-inner"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Blood Group Needed
                 </label>
-                <div className="relative">
-                  <select className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-red-500 focus:bg-white outline-none transition-all shadow-inner cursor-pointer appearance-none">
-                    <option value="">Select Group</option>
-                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(
-                      (g) => (
-                        <option key={g} value={g}>
-                          {g}
-                        </option>
-                      )
-                    )}
-                  </select>
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-red-400 font-bold">
-                    ▼
-                  </div>
-                </div>
+                <select className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none transition-all cursor-pointer shadow-inner">
+                  <option value="">Select Group</option>
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(
+                    (g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    )
+                  )}
+                </select>
               </div>
             </div>
 
-            {/* Row 2: Hospital & Address */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Hospital Name
                 </label>
                 <div className="relative">
-                  <FaHospital className="absolute left-5 top-1/2 -translate-y-1/2 text-red-500 text-lg" />
+                  <FaHospital className="absolute left-5 top-1/2 -translate-y-1/2 text-red-400" />
                   <input
                     type="text"
                     placeholder="e.g. Dhaka Medical College"
-                    className="w-full pl-14 pr-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-red-500 focus:bg-white outline-none transition-all shadow-inner placeholder:text-gray-300"
+                    className="w-full pl-12 pr-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none transition-all shadow-inner"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Full Address
                 </label>
                 <div className="relative">
-                  <FaMapMarkerAlt className="absolute left-5 top-1/2 -translate-y-1/2 text-red-500 text-lg" />
+                  <FaMapMarkerAlt className="absolute left-5 top-1/2 -translate-y-1/2 text-red-400" />
                   <input
                     type="text"
                     placeholder="e.g. Ward 5, Bed 12"
-                    className="w-full pl-14 pr-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-red-500 focus:bg-white outline-none transition-all shadow-inner placeholder:text-gray-300"
+                    className="w-full pl-12 pr-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none transition-all shadow-inner"
                     required
                   />
                 </div>
               </div>
             </div>
 
-            {/* Row 3: Location & Red Styled Calendar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Division
                 </label>
                 <select
                   onChange={handleDivisionChange}
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-red-500 focus:bg-white outline-none transition-all shadow-inner cursor-pointer"
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none"
                 >
                   <option value="">Select Division</option>
                   {allDivisions.map((div) => (
@@ -142,12 +153,12 @@ const DonationRequest = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   District
                 </label>
                 <select
                   disabled={!selectedDivisionId}
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-red-500 focus:bg-white outline-none transition-all shadow-inner disabled:opacity-50"
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none disabled:opacity-50"
                 >
                   <option value="">Select District</option>
                   {filteredDistricts.map((dis) => (
@@ -158,55 +169,46 @@ const DonationRequest = () => {
                 </select>
               </div>
 
+              {/* 📅 Blood Red Calendar Input */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Donation Date
                 </label>
-                <div className="relative group/cal">
-                  <FaCalendarAlt className="absolute left-5 top-1/2 -translate-y-1/2 text-red-600 z-10 text-xl" />
-                  <input
-                    type="date"
-                    className="w-full pl-14 pr-5 py-4 bg-red-50/50 border-2 border-red-100 rounded-2xl focus:border-red-500 focus:bg-white outline-none transition-all shadow-sm text-red-700 font-bold cursor-pointer 
-                    [color-scheme:light] 
-                    [&::-webkit-calendar-picker-indicator]:bg-red-500 [&::-webkit-calendar-picker-indicator]:rounded-md [&::-webkit-calendar-picker-indicator]:p-1 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:invert-[0.1]"
-                    required
+                <div className="relative calendar-wrapper">
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    className="w-full px-5 py-4 bg-red-50 border border-red-100 rounded-2xl focus:ring-2 focus:ring-red-500 text-red-700 font-bold outline-none transition-all cursor-pointer shadow-inner"
+                    dateFormat="MM/dd/yyyy"
+                    // Tailwind base classes for the calendar popup
+                    calendarClassName="blood-calendar shadow-2xl border-none rounded-2xl overflow-hidden"
+                    dayClassName={(date) => 'rounded-full hover:!bg-red-100'}
                   />
+                  <FaCalendarAlt className="absolute right-5 top-1/2 -translate-y-1/2 text-red-500 pointer-events-none" />
                 </div>
               </div>
             </div>
 
-            {/* Message Box */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-2 uppercase tracking-widest">
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-widest ml-1">
                 Reason / Message
               </label>
               <textarea
-                rows="4"
-                placeholder="Briefly describe the emergency situation..."
-                className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-[30px] focus:border-red-500 focus:bg-white outline-none transition-all shadow-inner resize-none placeholder:text-gray-300"
+                rows="3"
+                placeholder="Briefly describe the situation..."
+                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-[25px] focus:ring-2 focus:ring-red-500 outline-none transition-all resize-none shadow-inner"
               ></textarea>
             </div>
 
-            {/* Custom Post Request Button */}
             <div className="pt-6 flex justify-center">
               <button
                 type="submit"
-                className="group relative w-full md:w-[400px] overflow-hidden bg-gradient-to-r from-red-600 to-rose-600 text-white font-black py-5 rounded-[30px] shadow-[0_15px_35px_-10px_rgba(225,29,72,0.6)] hover:shadow-red-400/40 transition-all active:scale-[0.98] flex items-center justify-center gap-4 text-2xl uppercase tracking-tighter italic"
+                className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-black py-5 rounded-[25px] shadow-xl hover:shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-3 text-xl uppercase italic"
               >
-                <span className="relative z-10 flex items-center gap-3">
-                  <FaPaperPlane className="group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform duration-300" />
-                  Post Request
-                </span>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <FaPaperPlane className="text-lg" /> Post Request
               </button>
             </div>
           </form>
-        </div>
-
-        <div className="mt-12 flex items-center justify-center gap-2 text-gray-400 font-semibold italic">
-          <span className="h-px w-8 bg-gray-200"></span>
-          Please ensure all information is accurate
-          <span className="h-px w-8 bg-gray-200"></span>
         </div>
       </div>
     </div>
