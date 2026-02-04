@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, DollarSign, Users, Award, ExternalLink } from 'lucide-react';
+import { Link, NavLink } from 'react-router';
 
 const FundingPage = () => {
   // Fake Funding Data
@@ -63,9 +64,12 @@ const FundingPage = () => {
           Your small contribution helps us maintain the platform and reach more
           donors to save lives.
         </p>
-        <button className="mt-10 bg-white text-red-600 px-10 py-4 rounded-full font-black text-xl hover:scale-105 transition shadow-2xl uppercase tracking-tighter italic">
+        <NavLink
+          to={'/donating'}
+          className="mt-10 bg-white text-red-600 px-10 py-4 rounded-full font-black text-xl hover:scale-105 transition shadow-2xl uppercase tracking-tighter italic"
+        >
           Donate Now
-        </button>
+        </NavLink>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 -mt-12">

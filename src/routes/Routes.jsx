@@ -11,6 +11,7 @@ import Profile from '../pages/Profile';
 import Banner from '../components/home/Banner';
 import DonationRequest from '../pages/DonationRequest';
 import FundingPage from '../dashboard/funding/FundingPage';
+import Payment from '../dashboard/funding/Payment';
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
       {
         path: 'funding',
         element: <FundingPage />,
+      },
+      {
+        path: 'donating',
+        element: <Payment />,
       },
     ],
   },
