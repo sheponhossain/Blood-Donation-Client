@@ -24,7 +24,7 @@ const Banner = () => {
             </span>
           </h1>
 
-          <p className="text-gray-600 text-lg md:text-xl max-w-lg leading-relaxed">
+          <p className="text-gray-600 text-lg md:text-xl w leading-relaxed">
             Your contribution can make a difference between life and death. Join
             our community of heroes and help us bridge the gap between donors
             and recipients.

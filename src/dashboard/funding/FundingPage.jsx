@@ -72,7 +72,7 @@ const FundingPage = () => {
         </NavLink>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 -mt-12">
+      <div className="max-w- mx-auto px-4 -mt-12">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {stats.map((stat, idx) => (

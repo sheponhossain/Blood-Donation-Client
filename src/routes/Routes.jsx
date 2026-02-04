@@ -6,12 +6,16 @@ import SearchPage from '../pages/SearchPage';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import DashboardLayout from '../Layouts/DashboardLayout/DashboardLayout';
-import DonorDashboardHome from '../Layouts/DashboardLayout/DonorDashboardHome';
 import Profile from '../pages/Profile';
 import Banner from '../components/home/Banner';
 import DonationRequest from '../pages/DonationRequest';
 import FundingPage from '../dashboard/funding/FundingPage';
 import Payment from '../dashboard/funding/Payment';
+import AdminDashboard from '../dashboard/AdminDashboard/AdminDashboard';
+import AllUsers from '../dashboard/AdminDashboard/AllUsers';
+import AllDonationRequests from '../dashboard/AdminDashboard/AllDonationRequests';
+import ContentManagement from '../dashboard/AdminDashboard/ContentManagement';
+import Funding from '../dashboard/AdminDashboard/Funding';
 
 export const router = createBrowserRouter([
   {
@@ -60,11 +64,27 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true, // /dashboard path e eta dekhabe
-        element: <DonorDashboardHome />,
+        element: <AdminDashboard />,
       },
       {
         path: 'profile',
         element: <Profile />,
+      },
+      {
+        path: 'all-users',
+        element: <AllUsers />,
+      },
+      {
+        path: 'all-blood-donation-request',
+        element: <AllDonationRequests />,
+      },
+      {
+        path: 'content-management',
+        element: <ContentManagement />,
+      },
+      {
+        path: 'funding',
+        element: <Funding />,
       },
       // Admin/Volunteer routes pore add hobe
     ],

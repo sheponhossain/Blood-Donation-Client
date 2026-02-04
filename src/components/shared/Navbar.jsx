@@ -31,12 +31,11 @@ const Navbar = () => {
     'text-gray-600 hover:text-red-500 transition-all duration-300';
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white shadow-md sticky top-0 z-50 w-full">
+      {/* এখানে max-w-7xl এর বদলে w-full দেওয়া হয়েছে যাতে এটি পুরো বডি জুড়ে থাকে */}
+      <div className="w-full px-4 sm:px-6 lg:px-10">
         <div className="flex justify-between h-20">
-          {/* Logo Section */}
           <Logo />
-          {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
               <NavLink
@@ -74,6 +73,7 @@ const Navbar = () => {
                   <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-50">
                     <Link
                       to="/dashboard"
+                      onClick={() => setIsDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-red-50"
                     >
                       <LayoutDashboard className="w-4 h-4" /> Dashboard
@@ -117,6 +117,7 @@ const Navbar = () => {
             <Link
               key={link.path}
               to={link.path}
+              onClick={() => setIsOpen(false)}
               className="block text-lg text-gray-700 font-medium"
             >
               {link.name}
@@ -125,7 +126,11 @@ const Navbar = () => {
           <hr />
           {user ? (
             <>
-              <Link to="/dashboard" className="block text-lg text-gray-700">
+              <Link
+                to="/dashboard"
+                onClick={() => setIsOpen(false)}
+                className="block text-lg text-gray-700"
+              >
                 Dashboard
               </Link>
               <button className="text-lg text-red-600 font-bold">Logout</button>
@@ -133,6 +138,7 @@ const Navbar = () => {
           ) : (
             <Link
               to="/login"
+              onClick={() => setIsOpen(false)}
               className="block w-full text-center bg-red-600 text-white py-3 rounded-xl font-bold"
             >
               Login
