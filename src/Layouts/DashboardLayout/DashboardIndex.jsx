@@ -4,7 +4,7 @@ import VolunteerDashboardHome from '../../dashboard/volunteer/VolunteerDashboard
 import DonorDashboardHome from '../../dashboard/DonorDashboard/DonorDashboardHome';
 
 const DashboardIndex = () => {
-  const user = { role: 'donor' }; // 'admin', 'volunteer', 'donor'
+  const user = { role: 'volunteer' }; // 'admin', 'volunteer', 'donor'
 
   if (user.role === 'admin') {
     return <AdminDashboardHome />;

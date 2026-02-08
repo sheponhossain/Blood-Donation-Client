@@ -21,6 +21,8 @@ import DashboardIndex from '../Layouts/DashboardLayout/DashboardIndex';
 import MyDonationRequests from '../dashboard/DonorDashboard/MyDonationRequests';
 import CreateDonationRequest from '../dashboard/DonorDashboard/CreateDonationRequest';
 import EditDonationRequest from '../dashboard/DonorDashboard/EditDonationRequest';
+import DonationDetails from '../dashboard/DonorDashboard/DonationDetails';
+import VolunteerAllBloodDonationRequests from '../dashboard/volunteer/VolunteerAllBloodDonationRequests';
 
 export const router = createBrowserRouter([
   {
@@ -88,6 +90,10 @@ export const router = createBrowserRouter([
         element: <AllDonationRequests />,
       },
       {
+        path: 'volunteer-all-blood-donation-request',
+        element: <VolunteerAllBloodDonationRequests />,
+      },
+      {
         path: 'content-management',
         element: <ContentManagement />,
       },
@@ -106,6 +112,14 @@ export const router = createBrowserRouter([
       {
         path: 'edit-donation-request/:id',
         element: <EditDonationRequest />,
+      },
+      {
+        path: 'donation-details/:id',
+        element: (
+          //   <PrivateRoute>
+          <DonationDetails />
+          //   </PrivateRoute>
+        ),
       },
 
       // Admin/Volunteer routes pore add hobe
