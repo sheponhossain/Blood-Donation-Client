@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, Search, Users, Zap, ArrowRight } from 'lucide-react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const Features = () => {
   const coreFeatures = [
@@ -42,6 +43,16 @@ const Features = () => {
               Reliable Blood Network
             </span>
           </div>
+          <DotLottieReact
+            src="https://lottie.host/4c89fb84-d22e-4bb9-b6b4-809ab0f2aecf/9djO7V6o8h.lottie"
+            loop
+            autoplay
+          />
+          <DotLottieReact
+            src="https://lottie.host/c1d7551d-5d0c-4241-89fa-4b4ebac272af/kJNh0U2yoH.lottie"
+            loop
+            autoplay
+          />
 
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 lg:gap-16">
             {/* Headline - Scaled down for better readability */}

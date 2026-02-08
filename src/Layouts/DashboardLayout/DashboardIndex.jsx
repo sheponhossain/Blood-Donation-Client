@@ -1,13 +1,10 @@
 import React from 'react';
-// আপনার তৈরি করা কম্পোনেন্টগুলো ইমপোর্ট করুন
-import AdminDashboardHome from './AdminDashboardHome';
-import DonorDashboardHome from './DonorDashboardHome';
-import VolunteerDashboardHome from './VolunteerDashboardHome'; // যদি আলাদা ভিউ থাকে
+import AdminDashboardHome from '../../dashboard/AdminDashboard/AdminDashboardHome';
+import VolunteerDashboardHome from '../../dashboard/volunteer/VolunteerDashboardHome';
+import DonorDashboardHome from '../../dashboard/DonorDashboard/DonorDashboardHome';
 
 const DashboardIndex = () => {
-  // ১. ইউজার ডাটা এবং রোল সংগ্রহ করুন (এটি Context বা Redux থেকে আসবে)
-  // উদাহরণস্বরূপ:
-  const user = { role: 'admin' }; // 'admin', 'volunteer', 'donor'
+  const user = { role: 'donor' }; // 'admin', 'volunteer', 'donor'
 
   if (user.role === 'admin') {
     return <AdminDashboardHome />;

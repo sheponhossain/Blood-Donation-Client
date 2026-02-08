@@ -1,307 +1,307 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import {
-  User,
-  Mail,
-  Heart,
-  MapPin,
-  Building2,
-  Calendar,
-  Clock,
-  MessageSquare,
-  Droplets,
-  Send,
-  AlertTriangle,
-} from 'lucide-react';
+  FaPaperPlane,
+  FaHospital,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaUser,
+  FaEnvelope,
+  FaClock,
+  FaBan,
+} from 'react-icons/fa';
 import Swal from 'sweetalert2';
 
 const CreateDonationRequest = () => {
-  // ১. Fake Auth User (এখান থেকে নাম, ইমেইল এবং স্ট্যাটাস আসবে)
-  const [user] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    status: 'active', // এখানে 'blocked' করে চেক করতে পারেন
+  // ১. Fake Logged In User Data (এটি আপনার Auth Context থেকে আসবে)
+  // eslint-disable-next-line no-unused-vars
+  const [user, setUser] = useState({
+    name: 'Mehedi Hasan',
+    email: 'mehedi@example.com',
+    status: 'active', // 'blocked' দিয়ে টেস্ট করতে পারেন
   });
 
-  // ২. ফর্ম স্টেট
-  const [formData, setFormData] = useState({
-    recipientName: '',
-    recipientDistrict: '',
-    recipientUpazila: '',
-    hospitalName: '',
-    fullAddress: '',
-    bloodGroup: '',
-    donationDate: '',
-    donationTime: '',
-    requestMessage: '',
-  });
+  const [allDivisions, setAllDivisions] = useState([]);
+  const [allDistricts, setAllDistricts] = useState([]);
+  const [filteredDistricts, setFilteredDistricts] = useState([]);
+  const [selectedDivisionId, setSelectedDivisionId] = useState('');
+  const [startDate, setStartDate] = useState(new Date());
 
-  // ৩. হ্যান্ডলার ফাংশন
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  useEffect(() => {
+    fetch('/divisions.json')
+      .then((res) => res.json())
+      .then((data) => setAllDivisions(data));
+    fetch('/districts.json')
+      .then((res) => res.json())
+      .then((data) => setAllDistricts(data));
+  }, []);
+
+  const handleDivisionChange = (e) => {
+    const divId = e.target.value;
+    setSelectedDivisionId(divId);
+    setFilteredDistricts(
+      allDistricts.filter((dis) => dis.division_id === divId)
+    );
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // ব্লকড ইউজার চেক
-    if (user.status === 'blocked') {
-      Swal.fire({
-        title: 'Access Denied!',
-        text: 'Blocked users are not allowed to create donation requests.',
-        icon: 'error',
-        confirmButtonColor: '#dc2626',
-      });
-      return;
-    }
-
-    // সাকসেস মেসেজ (এখানে API কল হবে এবং ডিফল্ট স্ট্যাটাস 'pending' যাবে)
-    console.log('Submitting Request:', {
-      ...formData,
-      status: 'pending',
-      requesterName: user.name,
-      requesterEmail: user.email,
-    });
-
-    Swal.fire({
-      title: 'Request Created!',
-      text: 'Your blood donation request is now pending for donors.',
-      icon: 'success',
-      confirmButtonColor: '#dc2626',
-      customClass: { popup: 'rounded-[30px]' },
-    });
-  };
-
-  // ইউজার ব্লকড থাকলে তাকে ফর্ম না দেখিয়ে ওয়ার্নিং দেখানো
+  // ৩. ব্লকড ইউজার লজিক
   if (user.status === 'blocked') {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center bg-white rounded-[40px] border-2 border-dashed border-red-100 p-10 text-center">
-        <div className="w-20 h-20 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-6">
-          <AlertTriangle size={40} />
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-white p-12 rounded-[50px] shadow-2xl border border-red-50 max-w-lg">
+          <FaBan className="text-red-600 text-7xl mx-auto mb-6 animate-pulse" />
+          <h2 className="text-4xl font-black text-gray-800 uppercase italic tracking-tighter">
+            Access Denied
+          </h2>
+          <p className="mt-4 text-gray-500 font-medium">
+            Your account has been{' '}
+            <span className="text-red-600 font-bold">blocked</span>. Blocked
+            users are not permitted to create blood donation requests.
+          </p>
         </div>
-        <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight mb-2">
-          Account Restricted
-        </h2>
-        <p className="text-slate-500 max-w-sm font-medium">
-          Your account has been blocked. You cannot create new blood donation
-          requests at this moment.
-        </p>
       </div>
     );
   }
 
+  const handlePostRequest = (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    // ৪. সকল তথ্য সংগ্রহ (Status: pending ডিফল্ট)
+    const requestData = {
+      requesterName: user.name,
+      requesterEmail: user.email,
+      recipientName: form.recipientName.value,
+      bloodGroup: form.bloodGroup.value,
+      hospitalName: form.hospitalName.value,
+      fullAddress: form.fullAddress.value,
+      district: form.district.value,
+      donationDate: startDate,
+      donationTime: form.donationTime.value,
+      message: form.message.value,
+      status: 'pending',
+    };
+
+    console.log('Final Request Object:', requestData);
+
+    Swal.fire({
+      title: 'Success!',
+      text: 'Your blood request has been posted as PENDING.',
+      icon: 'success',
+      confirmButtonText: 'Great!',
+      confirmButtonColor: '#e11d48',
+      iconColor: '#e11d48',
+      background: '#ffffff',
+      customClass: {
+        popup: 'rounded-[30px]',
+        confirmButton: 'rounded-xl px-8 py-3 font-bold italic',
+      },
+    });
+  };
+
+  const inputClasses =
+    'w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition-all shadow-inner font-semibold text-gray-700';
+  const labelClasses =
+    'text-xs font-bold text-gray-400 uppercase tracking-widest ml-2 mb-1 block';
+
   return (
-    <div className="max-w-4xl mx-auto pb-10 animate-in fade-in duration-700">
-      {/* Header Section */}
-      <div className="mb-10 flex items-center gap-4">
-        <div className="p-4 bg-red-600 text-white rounded-2xl shadow-lg shadow-red-100">
-          <Heart size={28} className="fill-white" />
+    <div className="min-h-screen bg-[#f8fafc] py-16 px-4 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#e11d48_1.5px,transparent_1.5px)] [background-size:25px_25px]"></div>
+
+      <div className="max-w-4xl mx-auto relative">
+        <div className="bg-gradient-to-r from-red-600 to-rose-500 rounded-t-[40px] pt-12 pb-24 px-10 text-center shadow-lg">
+          <h2 className="text-4xl md:text-5xl font-bold text-white italic tracking-tight">
+            Create Blood Request
+          </h2>
         </div>
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase italic">
-            Create Request
-          </h1>
-          <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">
-            Fill in the details to find a donor
-          </p>
-        </div>
-      </div>
 
-      <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200 border border-slate-50 overflow-hidden">
-        <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-10">
-          {/* Section 1: Requester Info (Read-only) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-6 rounded-3xl border border-slate-100">
-            <FormInput
-              label="Requester Name"
-              icon={<User size={18} />}
-              value={user.name}
-              readOnly
-            />
-            <FormInput
-              label="Requester Email"
-              icon={<Mail size={18} />}
-              value={user.email}
-              readOnly
-            />
-          </div>
-
-          {/* Section 2: Recipient Details */}
-          <div className="space-y-8">
-            <h3 className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] border-l-4 border-red-600 pl-3">
-              Recipient Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <FormInput
-                label="Recipient Name"
-                name="recipientName"
-                placeholder="Enter full name"
-                onChange={handleChange}
-                required
-              />
-              <FormSelect
-                label="Blood Group"
-                name="bloodGroup"
-                icon={<Droplets size={18} />}
-                options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
-                onChange={handleChange}
-                required
-              />
-              <FormSelect
-                label="District"
-                name="recipientDistrict"
-                icon={<MapPin size={18} />}
-                options={['Dhaka', 'Chittagong', 'Rajshahi', 'Sylhet']}
-                onChange={handleChange}
-                required
-              />
-              <FormSelect
-                label="Upazila"
-                name="recipientUpazila"
-                icon={<MapPin size={18} />}
-                options={['Mirpur', 'Gulshan', 'Pahartali', 'Sadar']}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Section 3: Hospital & Location */}
-          <div className="space-y-8">
-            <h3 className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] border-l-4 border-red-600 pl-3">
-              Hospital & Venue
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <FormInput
-                label="Hospital Name"
-                name="hospitalName"
-                icon={<Building2 size={18} />}
-                placeholder="e.g. Dhaka Medical College"
-                onChange={handleChange}
-                required
-              />
-              <FormInput
-                label="Full Address Line"
-                name="fullAddress"
-                icon={<MapPin size={18} />}
-                placeholder="e.g. House 12, Road 5, Mirpur-10"
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Section 4: Date & Message */}
-          <div className="space-y-8">
-            <h3 className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] border-l-4 border-red-600 pl-3">
-              Donation Schedule
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <FormInput
-                label="Donation Date"
-                name="donationDate"
-                type="date"
-                icon={<Calendar size={18} />}
-                onChange={handleChange}
-                required
-              />
-              <FormInput
-                label="Donation Time"
-                name="donationTime"
-                type="time"
-                icon={<Clock size={18} />}
-                onChange={handleChange}
-                required
-              />
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">
-                  Request Message
+        <div className="bg-white rounded-[40px] shadow-2xl p-8 md:p-14 -mt-16 border border-white relative z-10">
+          <form onSubmit={handlePostRequest} className="space-y-8">
+            {/* Requester Info (Read Only) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-6 rounded-[30px] border border-slate-100">
+              <div className="space-y-2">
+                <label className={labelClasses}>
+                  Requester Name (Read-only)
                 </label>
                 <div className="relative">
-                  <MessageSquare
-                    className="absolute top-4 left-4 text-slate-300"
-                    size={18}
+                  <FaUser className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input
+                    type="text"
+                    value={user.name}
+                    readOnly
+                    className={`${inputClasses} pl-12 bg-slate-100 opacity-70 cursor-not-allowed`}
                   />
-                  <textarea
-                    name="requestMessage"
-                    rows="4"
-                    placeholder="Describe why you need blood in detail..."
-                    className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-600 font-bold text-slate-700 outline-none transition-all resize-none"
-                    onChange={handleChange}
-                    required
-                  ></textarea>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className={labelClasses}>
+                  Requester Email (Read-only)
+                </label>
+                <div className="relative">
+                  <FaEnvelope className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input
+                    type="email"
+                    value={user.email}
+                    readOnly
+                    className={`${inputClasses} pl-12 bg-slate-100 opacity-70 cursor-not-allowed`}
+                  />
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <div className="pt-6">
-            <button
-              type="submit"
-              className="w-full md:w-auto px-12 py-5 bg-red-600 text-white font-black rounded-2xl hover:bg-slate-900 transition-all shadow-xl shadow-red-100 flex items-center justify-center gap-3 uppercase text-[11px] tracking-[0.2em]"
-            >
-              <Send size={18} /> Send Donation Request
-            </button>
-          </div>
-        </form>
+            {/* Recipient Basic Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className={labelClasses}>Recipient Name</label>
+                <input
+                  name="recipientName"
+                  type="text"
+                  placeholder="Patient's Full Name"
+                  className={inputClasses}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className={labelClasses}>Blood Group Needed</label>
+                <select
+                  name="bloodGroup"
+                  required
+                  className={inputClasses + ' cursor-pointer'}
+                >
+                  <option value="">Select Group</option>
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(
+                    (g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+            </div>
+
+            {/* Hospital & Address */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className={labelClasses}>Hospital Name</label>
+                <div className="relative">
+                  <FaHospital className="absolute left-5 top-1/2 -translate-y-1/2 text-red-400" />
+                  <input
+                    name="hospitalName"
+                    type="text"
+                    placeholder="e.g. DMCH"
+                    className={`${inputClasses} pl-12`}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className={labelClasses}>Full Address</label>
+                <div className="relative">
+                  <FaMapMarkerAlt className="absolute left-5 top-1/2 -translate-y-1/2 text-red-400" />
+                  <input
+                    name="fullAddress"
+                    type="text"
+                    placeholder="Road No, Ward, Floor"
+                    className={`${inputClasses} pl-12`}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Location & Time Section (Upazila Removed) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <label className={labelClasses}>Division</label>
+                <select
+                  onChange={handleDivisionChange}
+                  className={inputClasses}
+                  required
+                >
+                  <option value="">Select Division</option>
+                  {allDivisions.map((div) => (
+                    <option key={div.id} value={div.id}>
+                      {div.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className={labelClasses}>District</label>
+                <select
+                  name="district"
+                  disabled={!selectedDivisionId}
+                  className={inputClasses}
+                  required
+                >
+                  <option value="">Select District</option>
+                  {filteredDistricts.map((dis) => (
+                    <option key={dis.id} value={dis.name}>
+                      {dis.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className={labelClasses}>Donation Time</label>
+                <div className="relative">
+                  <FaClock className="absolute left-5 top-1/2 -translate-y-1/2 text-red-400" />
+                  <input
+                    name="donationTime"
+                    type="time"
+                    className={`${inputClasses} pl-12`}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Date & Message */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className={labelClasses}>Donation Date</label>
+                <div className="relative">
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    className="w-full pl-12 pr-5 py-4 bg-red-50 border border-red-100 rounded-2xl focus:ring-2 focus:ring-red-500 text-red-700 font-bold outline-none cursor-pointer"
+                    dateFormat="MM/dd/yyyy"
+                  />
+                  <FaCalendarAlt className="absolute left-5 top-1/2 -translate-y-1/2 text-red-500 pointer-events-none" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className={labelClasses}>Reason / Message</label>
+                <textarea
+                  name="message"
+                  rows="1"
+                  placeholder="Why is blood needed?"
+                  className={`${inputClasses} resize-none`}
+                  required
+                ></textarea>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-6">
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-black py-5 rounded-[25px] shadow-xl hover:shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-3 text-xl uppercase italic tracking-widest"
+              >
+                <FaPaperPlane className="text-lg" /> Post Blood Request
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
-
-// --- Form Helper Components ---
-
-const FormInput = ({
-  label,
-  icon,
-  type = 'text',
-  readOnly = false,
-  ...props
-}) => (
-  <div className="space-y-2">
-    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">
-      {label}
-    </label>
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300">
-        {icon || <User size={18} />}
-      </div>
-      <input
-        type={type}
-        readOnly={readOnly}
-        className={`w-full pl-12 pr-6 py-4 rounded-2xl font-bold outline-none transition-all ${
-          readOnly
-            ? 'bg-white/50 text-slate-400 border border-slate-100 cursor-not-allowed'
-            : 'bg-slate-50 text-slate-800 border-none focus:ring-2 focus:ring-red-600'
-        }`}
-        {...props}
-      />
-    </div>
-  </div>
-);
-
-const FormSelect = ({ label, icon, options, ...props }) => (
-  <div className="space-y-2">
-    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">
-      {label}
-    </label>
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300">
-        {icon}
-      </div>
-      <select
-        className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-600 font-bold text-slate-700 outline-none appearance-none transition-all"
-        {...props}
-      >
-        <option value="">Select {label}</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-    </div>
-  </div>
-);
 
 export default CreateDonationRequest;

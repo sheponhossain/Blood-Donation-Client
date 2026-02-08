@@ -7,9 +7,11 @@ import {
   updateProfile,
 } from 'firebase/auth';
 
+// eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 import { auth } from '../firebase/firebase.config';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {

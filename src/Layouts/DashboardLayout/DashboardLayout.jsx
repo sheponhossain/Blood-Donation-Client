@@ -12,13 +12,11 @@ import {
 } from 'react-icons/fa';
 
 const DashboardLayout = () => {
-  // ১. Fake User State: এখান থেকে আপনি রোল কন্ট্রোল করতে পারবেন
   const [user, setUser] = useState({
     name: 'Test User',
-    role: 'admin', // ডিফল্ট রোল
+    role: 'donor',
   });
 
-  // রোল পরিবর্তন করার ফাংশন
   const toggleRole = (newRole) => {
     setUser({ ...user, role: newRole });
   };

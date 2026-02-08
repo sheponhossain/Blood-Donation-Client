@@ -17,6 +17,10 @@ import AllDonationRequests from '../dashboard/AdminDashboard/AllBloodDonationReq
 import ContentManagement from '../dashboard/AdminDashboard/ContentManagement';
 import Funding from '../dashboard/AdminDashboard/Funding';
 import Features from '../components/home/Features';
+import DashboardIndex from '../Layouts/DashboardLayout/DashboardIndex';
+import MyDonationRequests from '../dashboard/DonorDashboard/MyDonationRequests';
+import CreateDonationRequest from '../dashboard/DonorDashboard/CreateDonationRequest';
+import EditDonationRequest from '../dashboard/DonorDashboard/EditDonationRequest';
 
 export const router = createBrowserRouter([
   {
@@ -68,8 +72,8 @@ export const router = createBrowserRouter([
     element: <DashboardLayout />,
     children: [
       {
-        index: true, // /dashboard path e eta dekhabe
-        element: <AdminDashboard />,
+        index: true,
+        element: <DashboardIndex />,
       },
       {
         path: 'profile',
@@ -91,6 +95,19 @@ export const router = createBrowserRouter([
         path: 'funding',
         element: <Funding />,
       },
+      {
+        path: 'my-donation-requests',
+        element: <MyDonationRequests />,
+      },
+      {
+        path: 'create-donation-request',
+        element: <CreateDonationRequest />,
+      },
+      {
+        path: 'edit-donation-request/:id',
+        element: <EditDonationRequest />,
+      },
+
       // Admin/Volunteer routes pore add hobe
     ],
   },
