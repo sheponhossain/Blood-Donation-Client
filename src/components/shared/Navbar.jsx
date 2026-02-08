@@ -22,6 +22,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Donation Requests', path: '/donation-requests' },
+    { name: 'Blood Requests', path: '/Blood-requests' },
     { name: 'Funding', path: '/funding' },
   ];
 
@@ -32,7 +33,6 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50 w-full">
-      {/* এখানে max-w-7xl এর বদলে w-full দেওয়া হয়েছে যাতে এটি পুরো বডি জুড়ে থাকে */}
       <div className="w-full px-4 sm:px-6 lg:px-10">
         <div className="flex justify-between h-20">
           <Logo />

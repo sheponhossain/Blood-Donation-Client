@@ -23,6 +23,8 @@ import CreateDonationRequest from '../dashboard/DonorDashboard/CreateDonationReq
 import EditDonationRequest from '../dashboard/DonorDashboard/EditDonationRequest';
 import DonationDetails from '../dashboard/DonorDashboard/DonationDetails';
 import VolunteerAllBloodDonationRequests from '../dashboard/volunteer/VolunteerAllBloodDonationRequests';
+import BloodRequests from '../pages/BloodRequests';
+import BloodDetails from '../pages/BloodDetails';
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +39,14 @@ export const router = createBrowserRouter([
       {
         path: 'donation-requests', // Nuton Route
         element: <DonationRequest />,
+      },
+      {
+        path: 'Blood-requests', // Nuton Route
+        element: <BloodRequests />,
+      },
+      {
+        path: 'blood-details/:id', // Nuton Route
+        element: <BloodDetails />,
       },
       {
         path: 'Features', // Nuton Route

@@ -14,7 +14,7 @@ import {
 const DashboardLayout = () => {
   const [user, setUser] = useState({
     name: 'Test User',
-    role: 'volunteer',
+    role: 'admin',
   });
 
   const toggleRole = (newRole) => {
