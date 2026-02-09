@@ -10,8 +10,6 @@ import Profile from '../pages/Profile';
 import Banner from '../components/home/Banner';
 import DonationRequest from '../pages/DonationRequest';
 import FundingPage from '../dashboard/funding/FundingPage';
-import Payment from '../dashboard/funding/Payment';
-import AdminDashboard from '../dashboard/AdminDashboard/AdminDashboardHome';
 import AllUsers from '../dashboard/AdminDashboard/AllUsers';
 import AllDonationRequests from '../dashboard/AdminDashboard/AllBloodDonationRequests';
 import ContentManagement from '../dashboard/AdminDashboard/ContentManagement';
@@ -63,10 +61,6 @@ export const router = createBrowserRouter([
       {
         path: 'funding',
         element: <FundingPage />,
-      },
-      {
-        path: 'donating',
-        element: <Payment />,
       },
     ],
   },
