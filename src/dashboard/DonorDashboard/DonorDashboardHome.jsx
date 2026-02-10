@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // useContext যোগ করা হয়েছে
 import {
   Plus,
   MapPin,
@@ -16,9 +16,14 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import Swal from 'sweetalert2';
+import { AuthContext } from '../../providers/AuthProvider';
+import Welcome from '../../components/Welcome/Welcome';
 
 const DonorDashboardHome = () => {
-  const user = { name: 'John Doe', role: 'donor' };
+  // ১. AuthContext থেকে ইউজার ডেটা নিয়ে আসা
+  const { user: authUser } = useContext(AuthContext);
+
+  // আপনার রিকোয়েস্ট স্টেট (এগুলো পরে ডাটাবেস থেকে আনতে পারবেন)
   const [requests, setRequests] = useState([
     {
       id: 1,
@@ -51,22 +56,10 @@ const DonorDashboardHome = () => {
       time: '11:00 AM',
       bloodGroup: 'B+',
       status: 'done',
-      donorInfo: { name: 'John Doe', email: 'john@example.com' },
-    },
-    {
-      id: 3,
-      recipientName: 'Rakib Khan',
-      district: 'Rajshahi',
-      upazila: 'Sadar',
-      date: '2024-11-28',
-      time: '11:00 AM',
-      bloodGroup: 'B+',
-      status: 'done',
-      donorInfo: { name: 'John Doe', email: 'john@example.com' },
+      donorInfo: { name: authUser?.displayName, email: authUser?.email },
     },
   ]);
 
-  // ৩. Status Change Handler (Inprogress to Done/Canceled)
   const handleStatusChange = (id, newStatus) => {
     setRequests(
       requests.map((req) =>
@@ -81,7 +74,6 @@ const DonorDashboardHome = () => {
     });
   };
 
-  // ৪. Delete Handler with Confirmation
   const handleDelete = (id) => {
     Swal.fire({
       title: 'Are you sure?',
@@ -101,25 +93,9 @@ const DonorDashboardHome = () => {
 
   return (
     <div className="space-y-12">
+      {/* --- WELCOME SECTION (Dynamic Name Integrated) --- */}
       {/* --- WELCOME SECTION --- */}
-      <div className="bg-white rounded-[40px] p-10 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-            Welcome back,{' '}
-            <span className="text-red-600 uppercase">{user.name}</span>
-          </h1>
-          <p className="text-slate-500 font-medium mt-2">
-            Manage your donation requests and track your impact.
-          </p>
-        </div>
-        <Link
-          to="/dashboard/create-donation-request"
-          className="mt-6 md:mt-0 flex items-center gap-2 px-8 py-4 bg-red-600 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-red-100"
-        >
-          <Plus size={18} /> New Request
-        </Link>
-      </div>
-
+      <Welcome />
       {/* --- RECENT REQUESTS TABLE --- */}
       {requests.length > 0 && (
         <div className="bg-white rounded-[40px] shadow-xl shadow-slate-200/50 border border-slate-50 overflow-hidden">
@@ -147,16 +123,12 @@ const DonorDashboardHome = () => {
                     key={req.id}
                     className="hover:bg-slate-50/50 transition-all"
                   >
-                    <td className="px-8 py-6">
-                      <p className="font-black text-slate-800">
-                        {req.recipientName}
-                      </p>
+                    <td className="px-8 py-6 font-black text-slate-800">
+                      {req.recipientName}
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                        <MapPin size={14} className="text-red-600" />
-                        {req.upazila}, {req.district}
-                      </div>
+                    <td className="px-8 py-6 flex items-center gap-2 text-xs font-bold text-slate-500 mt-6">
+                      <MapPin size={14} className="text-red-600" />
+                      {req.upazila}, {req.district}
                     </td>
                     <td className="px-8 py-6">
                       <div className="text-[10px] font-black text-slate-700 uppercase">
@@ -190,8 +162,6 @@ const DonorDashboardHome = () => {
                         >
                           {req.status}
                         </span>
-
-                        {/* Donor Info (only shown if inprogress) */}
                         {req.status === 'inprogress' && req.donorInfo && (
                           <div className="flex items-center gap-2 mt-2 p-2 bg-slate-50 rounded-xl border border-slate-100">
                             <User size={12} className="text-blue-600" />
@@ -209,7 +179,6 @@ const DonorDashboardHome = () => {
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex justify-end gap-2">
-                        {/* DONE & CANCEL Buttons (Only inprogress) */}
                         {req.status === 'inprogress' && (
                           <>
                             <button
@@ -228,7 +197,6 @@ const DonorDashboardHome = () => {
                             </button>
                           </>
                         )}
-
                         <Link
                           to={`/dashboard/donation-details/${req.id}`}
                           className="p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-slate-900 hover:text-white transition-all"

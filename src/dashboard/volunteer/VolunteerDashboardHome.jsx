@@ -52,8 +52,8 @@ const VolunteerDashboardHome = () => {
           </h1>
           <p className="text-slate-500 font-medium mt-2">
             Monitoring the{' '}
-            <span className="text-red-600 font-bold">BloodFlow</span> network as
-            a Volunteer.
+            <span className="text-red-600 font-bold">Blood Donation</span>{' '}
+            network as a Volunteer.
           </p>
         </div>
         <Link

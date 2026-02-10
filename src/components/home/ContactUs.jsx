@@ -52,7 +52,7 @@ const ContactUs = () => {
                 <ContactLink
                   icon={<Mail size={20} />}
                   label="Support Email"
-                  value="hello@bloodflow.com"
+                  value="hello@Blood Donation.com"
                 />
                 <ContactLink
                   icon={<Clock size={20} />}

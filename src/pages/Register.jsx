@@ -21,10 +21,12 @@ const Register = () => {
     register,
     handleSubmit,
     watch,
+    // eslint-disable-next-line no-unused-vars
     formState: { errors },
   } = useForm();
 
   const selectedDivisionId = watch('division');
+  // eslint-disable-next-line no-unused-vars
   const selectedDistrictId = watch('district');
   const avatarFile = watch('avatar');
 
@@ -56,52 +58,61 @@ const Register = () => {
     setLoading(true);
 
     try {
+      // ১. ইমেজ আপলোড লজিক (যা আপনার ছিল)
       const imageFile = data.avatar[0];
-      if (!imageFile) {
-        setLoading(false);
-        return Swal.fire('Error', 'Please select a profile picture', 'error');
-      }
-
       const formData = new FormData();
       formData.append('image', imageFile);
       const imgBBKey = '02ede86040a806d18640942ecc23f6cc';
-      const url = `https://api.imgbb.com/1/upload?key=${imgBBKey}`;
-      const response = await axios.post(url, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const imgRes = await axios.post(
+        `https://api.imgbb.com/1/upload?key=${imgBBKey}`,
+        formData
+      );
 
-      if (response.data.success) {
-        const photoURL = response.data.data.display_url;
+      if (imgRes.data.success) {
+        const photoURL = imgRes.data.data.display_url;
+
+        // ২. Firebase-এ ইউজার তৈরি করা
         await createUser(data.email, data.password);
         await updateUserProfile(data.name, photoURL);
 
+        // ৩. আপনার ডাটাবেসের জন্য অবজেক্ট তৈরি করা (সার্ভারে যা পাঠাবেন)
         const newUser = {
           name: data.name,
           email: data.email,
-          avatar: photoURL,
+          password: data.password,
           bloodGroup: data.bloodGroup,
-          division: divisions.find(
-            (d) => String(d.id) === String(data.division)
-          )?.name,
           district: allDistricts.find(
             (d) => String(d.id) === String(data.district)
           )?.name,
+          division: divisions.find(
+            (d) => String(d.id) === String(data.division)
+          )?.name,
+          avatar: photoURL,
           status: 'active',
           role: 'donor',
         };
 
-        console.log('User registered successfully:', newUser);
+        // ৪. Axios দিয়ে আপনার নিজের সার্ভারে ডেটা পাঠানো
+        // নিশ্চিত করুন আপনার ব্যাকেন্ড পোট ৫০icon০০ তে চলছে
+        const serverRes = await axios.post(
+          'http://localhost:5000/register',
+          newUser
+        );
 
-        Swal.fire('Success', 'Registration Successful!', 'success');
-        navigate('/');
+        if (serverRes.data.message === 'Registration Successful') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Registration Successful & Saved to Database!',
+            timer: 2000,
+          });
+          navigate('/');
+        }
       }
     } catch (error) {
-      console.error('Full Error Object:', error);
-      const errorMessage =
-        error.response?.data?.error?.message || error.message;
-      Swal.fire('Error', `Upload failed: ${errorMessage}`, 'error');
+      console.error('Registration Error:', error);
+      const errorMessage = error.response?.data?.message || error.message;
+      Swal.fire('Error', `Registration failed: ${errorMessage}`, 'error');
     } finally {
       setLoading(false);
     }

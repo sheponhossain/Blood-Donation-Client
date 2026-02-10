@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import {
@@ -12,15 +12,12 @@ import {
   FaBan,
 } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import { AuthContext } from '../../providers/AuthProvider';
+import useAxiosSecure from '../../Hooks/useAxiosSecure';
 
 const CreateDonationRequest = () => {
-  // ১. Fake Logged In User Data (এটি আপনার Auth Context থেকে আসবে)
-  // eslint-disable-next-line no-unused-vars
-  const [user, setUser] = useState({
-    name: 'Mehedi Hasan',
-    email: 'mehedi@example.com',
-    status: 'active', // 'blocked' দিয়ে টেস্ট করতে পারেন
-  });
+  const { user, loading } = useContext(AuthContext);
+  const axiosSecure = useAxiosSecure();
 
   const [allDivisions, setAllDivisions] = useState([]);
   const [allDistricts, setAllDistricts] = useState([]);
@@ -28,6 +25,7 @@ const CreateDonationRequest = () => {
   const [selectedDivisionId, setSelectedDivisionId] = useState('');
   const [startDate, setStartDate] = useState(new Date());
 
+  // Location Data Fetch
   useEffect(() => {
     fetch('/divisions.json')
       .then((res) => res.json())
@@ -45,8 +43,17 @@ const CreateDonationRequest = () => {
     );
   };
 
-  // ৩. ব্লকড ইউজার লজিক
-  if (user.status === 'blocked') {
+  // ১. লোডিং স্টেট হ্যান্ডেলিং (এতে 'status of null' এরর আসবে না)
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="loading loading-bars loading-lg text-red-600"></span>
+      </div>
+    );
+  }
+
+  // ২. ব্লকড ইউজার লজিক
+  if (user?.status === 'blocked') {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
         <div className="bg-white p-12 rounded-[50px] shadow-2xl border border-red-50 max-w-lg">
@@ -64,40 +71,50 @@ const CreateDonationRequest = () => {
     );
   }
 
-  const handlePostRequest = (e) => {
+  const handlePostRequest = async (e) => {
     e.preventDefault();
     const form = e.target;
 
-    // ৪. সকল তথ্য সংগ্রহ (Status: pending ডিফল্ট)
+    // Data Structure
     const requestData = {
-      requesterName: user.name,
-      requesterEmail: user.email,
+      requesterName: user?.displayName || 'Anonymous',
+      requesterEmail: user?.email,
       recipientName: form.recipientName.value,
       bloodGroup: form.bloodGroup.value,
       hospitalName: form.hospitalName.value,
       fullAddress: form.fullAddress.value,
       district: form.district.value,
-      donationDate: startDate,
+      // Date-কে ISO স্ট্রিং এ রূপান্তর করা ভালো ডাটাবেসের জন্য
+      donationDate: startDate.toISOString().split('T')[0],
       donationTime: form.donationTime.value,
       message: form.message.value,
       status: 'pending',
     };
 
-    console.log('Final Request Object:', requestData);
+    try {
+      // ৩. সার্ভারে ডাটা পাঠানো
+      const res = await axiosSecure.post('/donation-requests', requestData);
 
-    Swal.fire({
-      title: 'Success!',
-      text: 'Your blood request has been posted as PENDING.',
-      icon: 'success',
-      confirmButtonText: 'Great!',
-      confirmButtonColor: '#e11d48',
-      iconColor: '#e11d48',
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-[30px]',
-        confirmButton: 'rounded-xl px-8 py-3 font-bold italic',
-      },
-    });
+      if (res.data.insertedId) {
+        Swal.fire({
+          title: 'Successfully Requested!',
+          text: 'Your blood request is now pending for donors.',
+          icon: 'success',
+          confirmButtonColor: '#e11d48',
+          customClass: { popup: 'rounded-[30px]' },
+        });
+        form.reset();
+        setStartDate(new Date());
+      }
+    } catch (err) {
+      console.error('Request Failed:', err.response?.data || err.message);
+      Swal.fire({
+        title: 'Error!',
+        text:
+          err.response?.data?.message || 'Failed to post request. Try again!',
+        icon: 'error',
+      });
+    }
   };
 
   const inputClasses =
@@ -121,30 +138,26 @@ const CreateDonationRequest = () => {
             {/* Requester Info (Read Only) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-6 rounded-[30px] border border-slate-100">
               <div className="space-y-2">
-                <label className={labelClasses}>
-                  Requester Name (Read-only)
-                </label>
+                <label className={labelClasses}>Requester Name</label>
                 <div className="relative">
                   <FaUser className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                   <input
                     type="text"
-                    value={user.name}
+                    value={user?.displayName || ''}
                     readOnly
-                    className={`${inputClasses} pl-12 bg-slate-100 opacity-70 cursor-not-allowed`}
+                    className={`${inputClasses} pl-12 bg-slate-200 opacity-70 cursor-not-allowed`}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className={labelClasses}>
-                  Requester Email (Read-only)
-                </label>
+                <label className={labelClasses}>Requester Email</label>
                 <div className="relative">
                   <FaEnvelope className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                   <input
                     type="email"
-                    value={user.email}
+                    value={user?.email || ''}
                     readOnly
-                    className={`${inputClasses} pl-12 bg-slate-100 opacity-70 cursor-not-allowed`}
+                    className={`${inputClasses} pl-12 bg-slate-200 opacity-70 cursor-not-allowed`}
                   />
                 </div>
               </div>
@@ -213,7 +226,7 @@ const CreateDonationRequest = () => {
               </div>
             </div>
 
-            {/* Location & Time Section (Upazila Removed) */}
+            {/* Location & Time Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className={labelClasses}>Division</label>
@@ -281,14 +294,13 @@ const CreateDonationRequest = () => {
                 <textarea
                   name="message"
                   rows="1"
-                  placeholder="Why is blood needed?"
+                  placeholder="Details..."
                   className={`${inputClasses} resize-none`}
                   required
-                ></textarea>
+                />
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="pt-6">
               <button
                 type="submit"

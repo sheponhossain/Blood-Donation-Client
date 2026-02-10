@@ -14,7 +14,7 @@ import {
 const DashboardLayout = () => {
   const [user, setUser] = useState({
     name: 'Test User',
-    role: 'admin',
+    role: 'donor',
   });
 
   const toggleRole = (newRole) => {
@@ -48,7 +48,7 @@ const DashboardLayout = () => {
               </svg>
             </label>
             <div className="px-2 font-bold text-red-600 hidden md:block">
-              BloodFlow Dashboard
+              Blood Donation Dashboard
             </div>
           </div>
 
@@ -84,7 +84,7 @@ const DashboardLayout = () => {
         <label htmlFor="my-drawer-4" className="drawer-overlay"></label>
         <div className="flex min-h-full flex-col w-64 bg-white border-r text-base-content">
           <div className="p-6 text-2xl font-bold text-red-600 border-b flex items-center gap-2">
-            🩸 BloodFlow
+            🩸 Blood Donation
           </div>
 
           <ul className="menu p-4 w-full grow gap-2">
@@ -205,16 +205,18 @@ const DashboardLayout = () => {
               </>
             )}
 
-            <li>
-              <NavLink
-                to="/dashboard/funding"
-                className={({ isActive }) =>
-                  isActive ? 'bg-red-600 text-white' : ''
-                }
-              >
-                <FaDonate className="size-4" /> Funding
-              </NavLink>
-            </li>
+            {user.role !== 'donor' && (
+              <li>
+                <NavLink
+                  to="/dashboard/funding"
+                  className={({ isActive }) =>
+                    isActive ? 'bg-red-600 text-white' : ''
+                  }
+                >
+                  <FaDonate className="size-4" /> Funding
+                </NavLink>
+              </li>
+            )}
 
             <div className="mt-auto border-t pt-4">
               <li>

@@ -6,7 +6,7 @@ import DonorDashboardHome from '../../dashboard/DonorDashboard/DonorDashboardHom
 const DashboardIndex = () => {
   const user = { role: 'admin' }; // 'admin', 'volunteer', 'donor'
 
-  if (user.role === 'admin') {
+  if (user.role === 'donor') {
     return <AdminDashboardHome />;
   }
 

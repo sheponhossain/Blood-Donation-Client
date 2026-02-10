@@ -30,7 +30,7 @@
 //           </h1>
 //           <p className="text-slate-500 font-medium mt-2">
 //             Here's what's happening with{' '}
-//             <span className="text-red-600 font-bold">BloodFlow</span> today.
+//             <span className="text-red-600 font-bold">Blood Donation</span> today.
 //           </p>
 //         </div>
 //         <Link

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../providers/AuthProvider'; // আপনার পাথ অনুযায়ী
 import {
   User,
   Mail,
@@ -11,61 +12,148 @@ import {
   Camera,
   Globe,
   Activity,
-  Heart,
-  CheckCircle,
   X,
   LayoutGrid,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 
 const Profile = () => {
-  // এডিট মোড কন্ট্রোল করার স্টেট
+  const { user: authUser, updateUserProfile } = useContext(AuthContext);
   const [isEditable, setIsEditable] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [user, setUser] = useState({
-    displayName: 'John Doe',
-    email: 'john.doe@example.com',
-    photoURL:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200',
-    role: 'Admin',
-    bloodGroup: 'A+',
-    division: 'Dhaka',
-    district: 'Dhaka',
-    status: 'active',
-    joinedDate: 'January 2024',
+    displayName: '',
+    email: '',
+    photoURL: '',
+    role: '',
+    bloodGroup: '',
+    division: '',
+    district: '',
+    status: '',
+    joinedDate: '',
   });
+
+  useEffect(() => {
+    if (authUser?.email) {
+      setLoading(true);
+      axios
+        .get(`http://localhost:5000/user/${authUser.email}`)
+        .then((res) => {
+          const data = res.data;
+          setUser({
+            displayName: data.name || authUser.displayName,
+            email: data.email,
+            photoURL: data.avatar || authUser.photoURL,
+            role: data.role || 'donor',
+            bloodGroup: data.bloodGroup || 'Not Set',
+            division: data.division || 'Not Set',
+            district: data.district || 'Not Set',
+            status: data.status || 'active',
+            joinedDate:
+              new Date(data.createdAt).toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric',
+              }) || 'January 2024',
+          });
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoading(false);
+        });
+    }
+  }, [authUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
   };
 
-  const handleImageChange = (e) => {
+  // ২. ইমেজ পরিবর্তন এবং সরাসরি ImageBB তে আপলোড
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUser({ ...user, photoURL: reader.result });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      Swal.fire({
+        title: 'Uploading...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      const imgBBKey = '02ede86040a806d18640942ecc23f6cc'; // আপনার Key
+      const res = await axios.post(
+        `https://api.imgbb.com/1/upload?key=${imgBBKey}`,
+        formData
+      );
+
+      if (res.data.success) {
+        setUser({ ...user, photoURL: res.data.data.display_url });
+        Swal.fire(
+          'Success!',
+          'Image uploaded. Click save to finalize.',
+          'success'
+        );
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      Swal.fire('Error', 'Image upload failed', 'error');
     }
   };
 
-  const handleUpdate = (e) => {
+  // ৩. প্রোফাইল আপডেট (Firebase + MongoDB)
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    setIsEditable(false);
-    Swal.fire({
-      title: 'Success!',
-      text: 'Profile updated successfully.',
-      icon: 'success',
-      confirmButtonColor: '#e11d48',
-      customClass: { popup: 'rounded-3xl' },
-    });
+    setLoading(true);
+
+    try {
+      // ফায়ারবেস প্রোফাইল আপডেট
+      await updateUserProfile(user.displayName, user.photoURL);
+
+      // আপনার MongoDB ব্যাকেন্ড আপডেট
+      const updateData = {
+        name: user.displayName,
+        avatar: user.photoURL,
+        bloodGroup: user.bloodGroup,
+        division: user.division,
+        district: user.district,
+      };
+
+      const response = await axios.patch(
+        `http://localhost:5000/user-update/${user.email}`,
+        updateData
+      );
+
+      if (response.data) {
+        setIsEditable(false);
+        Swal.fire({
+          title: 'Success!',
+          text: 'Profile updated successfully in DB & Firebase.',
+          icon: 'success',
+          confirmButtonColor: '#e11d48',
+        });
+      }
+    } catch (error) {
+      Swal.fire('Error!', error.message, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading && !user.email)
+    return (
+      <div className="min-h-screen flex items-center justify-center font-black animate-pulse">
+        LOADING PROFILE CORE...
+      </div>
+    );
 
   return (
     <div className="max-w-6xl mx-auto space-y-10 pb-10">
-      {/* Banner */}
       <div className="relative h-48 w-full bg-gradient-to-r from-red-600 to-rose-400 rounded-t-[40px] shadow-lg">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
       </div>
@@ -76,12 +164,11 @@ const Profile = () => {
             onSubmit={handleUpdate}
             className="flex flex-col lg:flex-row gap-12"
           >
-            {/* Left: Avatar Section */}
             <div className="lg:w-1/3 flex flex-col items-center">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-tr from-red-600 to-rose-400 rounded-full blur opacity-20"></div>
                 <img
-                  src={user.photoURL}
+                  src={user.photoURL || 'https://via.placeholder.com/150'}
                   className="relative w-44 h-44 rounded-full border-8 border-white object-cover shadow-2xl"
                   alt="Profile"
                 />
@@ -123,11 +210,14 @@ const Profile = () => {
                   value={user.bloodGroup}
                   color="text-red-600"
                 />
-                <StatCard label="Rank" value="Gold" color="text-amber-500" />
+                <StatCard
+                  label="Rank"
+                  value={user.role === 'admin' ? 'Elite' : 'Gold'}
+                  color="text-amber-500"
+                />
               </div>
             </div>
 
-            {/* Right: Form Section */}
             <div className="lg:w-2/3 space-y-10">
               <div className="flex justify-between items-center border-b border-slate-100 pb-6">
                 <h2 className="text-xl font-black text-slate-800 tracking-widest flex items-center gap-3">
@@ -149,7 +239,7 @@ const Profile = () => {
                       type="submit"
                       className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
                     >
-                      <Save size={14} /> Save
+                      <Save size={14} /> {loading ? 'Saving...' : 'Save'}
                     </button>
                     <button
                       type="button"
@@ -171,7 +261,6 @@ const Profile = () => {
                   editable={isEditable}
                   onChange={handleChange}
                 />
-
                 <EditableField
                   label="Email Address"
                   icon={<Mail size={18} />}
@@ -179,7 +268,6 @@ const Profile = () => {
                   value={user.email}
                   editable={false}
                 />
-
                 <EditableField
                   label="Division"
                   icon={<LayoutGrid size={18} />}
@@ -199,7 +287,6 @@ const Profile = () => {
                     'Mymensingh',
                   ]}
                 />
-
                 <EditableField
                   label="District"
                   icon={<MapPin size={18} />}
@@ -208,7 +295,6 @@ const Profile = () => {
                   editable={isEditable}
                   onChange={handleChange}
                 />
-
                 <EditableField
                   label="Blood Group"
                   icon={<Droplets size={18} />}
@@ -219,7 +305,6 @@ const Profile = () => {
                   isSelect
                   options={['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']}
                 />
-
                 <EditableField
                   label="Country"
                   icon={<Globe size={18} />}
@@ -229,7 +314,6 @@ const Profile = () => {
                 />
               </div>
 
-              {/* Joined Date Display */}
               <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl w-fit">
                 <Calendar size={16} className="text-slate-400" />
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -243,9 +327,9 @@ const Profile = () => {
     </div>
   );
 };
+// ... (Profile কম্পোনেন্টের বাকি কোড)
 
 // --- SUB-COMPONENTS ---
-
 const StatCard = ({ label, value, color }) => (
   <div className="bg-slate-50/50 p-4 rounded-[25px] text-center border border-slate-100 shadow-sm">
     <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">
@@ -294,4 +378,6 @@ const EditableField = ({
   </div>
 );
 
+// এটি নিশ্চিত করুন:
 export default Profile;
+// Sub-components (StatCard, EditableField) আপনার আগের কোডেই থাকবে...
