@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Users,
   DollarSign,
@@ -22,10 +22,22 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
+import Welcome from '../../components/Welcome/Welcome';
 
 const AdminDashboardHome = () => {
-  const user = { name: 'Admin Chief' };
   const [period, setPeriod] = useState('Daily');
+  const [dbStats, setDbStats] = useState({
+    totalDonors: 0,
+    totalRequests: 0,
+    totalFunding: 0,
+  });
+
+  useEffect(() => {
+    fetch('http://localhost:5000/admin-stats')
+      .then((res) => res.json())
+      .then((data) => setDbStats(data))
+      .catch((err) => console.error('Stats fetch error:', err));
+  }, []);
 
   const dataMap = {
     Daily: [
@@ -57,7 +69,7 @@ const AdminDashboardHome = () => {
     {
       id: 1,
       title: 'Total Donors',
-      count: '1,240',
+      count: dbStats.totalDonors.toLocaleString(),
       icon: <Users size={20} />,
       color: 'bg-red-50',
       textColor: 'text-red-600',
@@ -67,7 +79,7 @@ const AdminDashboardHome = () => {
     {
       id: 2,
       title: 'Total Funding',
-      count: '$52,490',
+      count: `$${dbStats.totalFunding.toLocaleString()}`,
       icon: <DollarSign size={20} />,
       color: 'bg-slate-100',
       textColor: 'text-slate-900',
@@ -77,7 +89,7 @@ const AdminDashboardHome = () => {
     {
       id: 3,
       title: 'Requests',
-      count: '842',
+      count: dbStats.totalRequests.toLocaleString(),
       icon: <GitPullRequest size={20} />,
       color: 'bg-red-500',
       textColor: 'text-white',
@@ -89,36 +101,7 @@ const AdminDashboardHome = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-1000 pb-10">
       {/* 1. Header with Glassmorphism Effect */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            Welcome back,{' '}
-            <span className="text-red-600 italic uppercase">
-              {user.name.split(' ')[0]}
-            </span>{' '}
-            👋
-          </h1>
-          <p className="text-slate-500 font-semibold text-sm mt-1">
-            Here's what's happening with your blood donation network today.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex flex-col items-end mr-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              System Status
-            </span>
-            <span className="text-emerald-500 text-xs font-black flex items-center gap-1">
-              <Activity size={12} /> Operational
-            </span>
-          </div>
-          <Link
-            to="/dashboard/create-donation-request"
-            className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-red-600 transition-all shadow-xl active:scale-95"
-          >
-            <Plus size={16} /> Create Request
-          </Link>
-        </div>
-      </div>
+      <Welcome />
 
       {/* 2. Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

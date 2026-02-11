@@ -1,132 +1,184 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { Save } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import useAxiosSecure from '../../Hooks/useAxiosSecure';
 
 const EditDonationRequest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const axiosSecure = useAxiosSecure();
 
-  const [divisions, setDivisions] = useState([]); // বিভাগের জন্য
-  const [allDistricts, setAllDistricts] = useState([]); // সকল জেলার জন্য
-  const [loading, setLoading] = useState(false);
+  const [divisions, setDivisions] = useState([]);
+  const [allDistricts, setAllDistricts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     recipientName: '',
-    recipientDistrict: '', // এটি আসলে Division এর জন্য (ID বা Name স্টোর করবে)
-    recipientUpazila: '', // এটি আসলে District এর জন্য (ID বা Name স্টোর করবে)
+    bloodGroup: '',
+    recipientDistrict: '',
+    recipientUpazila: '',
     hospitalName: '',
     fullAddress: '',
-    bloodGroup: '',
     donationDate: '',
     donationTime: '',
     requestMessage: '',
   });
 
-  // ১. JSON ডেটা ফেচ করা
+  const inputClasses =
+    'w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700 outline-none transition-all';
+  const labelClasses =
+    'text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1 block';
+
+  // useEffect er bhetore data load hobar ongsho-ti eibhabe modify korun
   useEffect(() => {
-    // বিভাগ লোড
-    fetch('/divisions.json')
-      .then((res) => res.json())
-      .then((data) => setDivisions(data))
-      .catch((err) => console.error('Error fetching divisions:', err));
+    const initializeData = async () => {
+      try {
+        // ১. আগে Location JSON গুলো fetch করে ফেলি
+        const [divRes, disRes] = await Promise.all([
+          fetch(`${window.location.origin}/divisions.json`).then((res) =>
+            res.json()
+          ),
+          fetch(`${window.location.origin}/districts.json`).then((res) =>
+            res.json()
+          ),
+        ]);
 
-    // জেলা লোড
-    fetch('/districts.json')
-      .then((res) => res.json())
-      .then((data) => setAllDistricts(data))
-      .catch((err) => console.error('Error fetching districts:', err));
+        setDivisions(divRes);
+        setAllDistricts(disRes);
 
-    // ২. বর্তমান রিকোয়েস্টের ডেটা লোড (Mock logic)
-    const fetchCurrentRequest = async () => {
-      // এখানে আপনার API থেকে ডেটা আসবে (যেমন: axios.get)
-      const mockData = {
-        recipientName: 'Arif Ahmed',
-        recipientDistrict: '3', // উদাহরণস্বরূপ ঢাকা বিভাগের ID (আপনার JSON অনুযায়ী নামও হতে পারে)
-        recipientUpazila: 'Dhaka', // জেলার নাম
-        hospitalName: 'Dhaka Medical College',
-        fullAddress: 'Zahir Raihan Rd, Dhaka',
-        bloodGroup: 'A+',
-        donationDate: '2024-11-20',
-        donationTime: '10:00',
-        requestMessage: 'Urgent need for heart surgery.',
-      };
-      setFormData(mockData);
+        // ২. এবার DB থেকে Data আনি
+        const res = await axiosSecure.get(`/donation-request/${id}`);
+        const data = res.data;
+
+        if (data) {
+          /* ম্যাজিক পার্ট: 
+          ডাটাবেসে যদি 'Dhaka' (নাম) থাকে কিন্তু আপনার সিলেক্ট ফিল্ড ID (1, 2) দিয়ে কাজ করে, 
+          তবে আমাদের JSON থেকে ওই নামের ID খুঁজে বের করতে হবে।
+        */
+          const matchedDivision = divRes.find(
+            (d) => d.name.toLowerCase() === (data.division || '').toLowerCase()
+          );
+
+          setFormData({
+            recipientName: data.recipientName || '',
+            bloodGroup: data.bloodGroup || '',
+            // যদি ID পাওয়া যায় তবে সেটা দেবে, নাহলে ডাটাবেসেরটা
+            recipientDistrict: matchedDivision
+              ? String(matchedDivision.id)
+              : data.recipientDistrict || '',
+            recipientUpazila: data.district || data.recipientUpazila || '',
+            hospitalName: data.hospitalName || '',
+            fullAddress: data.fullAddress || '',
+            division: data.division || '', // ব্যাকএন্ডের জন্য নাম সেভ রাখা
+            donationDate: data.donationDate || '',
+            donationTime: data.donationTime || '',
+            requestMessage: data.message || data.requestMessage || '',
+          });
+        }
+      } catch (err) {
+        console.error('Loading Error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchCurrentRequest();
-  }, [id]);
+
+    initializeData();
+  }, [id, axiosSecure]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      // যদি বিভাগ পরিবর্তন হয়, তবে জেলা ইনপুট রিসেট হবে
-      ...(name === 'recipientDistrict' && { recipientUpazila: '' }),
-    }));
+
+    if (name === 'recipientDistrict') {
+      const selectedDiv = divisions.find(
+        (div) => String(div.id) === String(value)
+      );
+      setFormData((prev) => ({
+        ...prev,
+        recipientDistrict: value,
+        division: selectedDiv ? selectedDiv.name : '',
+        recipientUpazila: '', // Division change hole district reset hoye jabe
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setUpdateLoading(true);
+
+    const updatedPayload = {
+      ...formData,
+      district: formData.recipientUpazila,
+      division:
+        divisions.find(
+          (d) => String(d.id) === String(formData.recipientDistrict)
+        )?.name || formData.division,
+    };
+
     try {
-      console.log('Updated Data:', formData);
-      Swal.fire({
-        title: 'Updated!',
-        text: 'Donation request has been updated successfully.',
-        icon: 'success',
-        confirmButtonColor: '#ef4444',
-      });
-      navigate('/dashboard/my-donation-requests');
-      // eslint-disable-next-line no-unused-vars
+      const res = await axiosSecure.patch(
+        `/donation-request/${id}`,
+        updatedPayload
+      );
+      if (res.data.modifiedCount > 0 || res.data) {
+        Swal.fire({
+          title: 'Updated!',
+          text: 'Donation request updated successfully.',
+          icon: 'success',
+          confirmButtonColor: '#e11d48',
+          customClass: { popup: 'rounded-[30px]' },
+        });
+        navigate('/dashboard/my-donation-requests');
+      }
     } catch (error) {
-      Swal.fire('Error', 'Something went wrong!', 'error');
+      console.error('Update Error:', error);
+      Swal.fire('Error', 'Update failed. Try again!', 'error');
     } finally {
-      setLoading(false);
+      setUpdateLoading(false);
     }
   };
 
+  if (loading)
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center font-black italic text-slate-400 animate-pulse uppercase tracking-widest">
+        Loading Data...
+      </div>
+    );
+
   return (
-    <div className="max-w-4xl mx-auto mb-10">
-      <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-xl border border-slate-50">
-        {/* Header */}
-        <div className="mb-10 text-center md:text-left">
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">
+    <div className="max-w-4xl mx-auto mb-10 px-4">
+      <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl border border-slate-50 relative">
+        <div className="mb-10">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase italic">
             Edit <span className="text-red-600">Donation Request</span>
           </h2>
-          <p className="text-slate-500 font-medium mt-2">
-            Update the details for the blood recipient below.
-          </p>
         </div>
 
         <form onSubmit={handleUpdate} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Recipient Name */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Recipient Name
-              </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Recipient Name & Blood Group (Ager motoi thakbe) */}
+            <div className="flex flex-col">
+              <label className={labelClasses}>Recipient Name</label>
               <input
                 type="text"
                 name="recipientName"
                 value={formData.recipientName}
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700"
-                placeholder="Enter Name"
+                className={inputClasses}
                 required
               />
             </div>
 
-            {/* Blood Group */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Blood Group
-              </label>
+            <div className="flex flex-col">
+              <label className={labelClasses}>Blood Group Needed</label>
               <select
                 name="bloodGroup"
                 value={formData.bloodGroup}
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700"
+                className={inputClasses}
               >
                 {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(
                   (group) => (
@@ -138,43 +190,37 @@ const EditDonationRequest = () => {
               </select>
             </div>
 
-            {/* Recipient Division (আগে যেখানে District ছিল) */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Recipient Division
-              </label>
+            {/* Division Selector: value={String(...)} auto-select nishchit korbe */}
+            <div className="flex flex-col">
+              <label className={labelClasses}>Recipient Division</label>
               <select
                 name="recipientDistrict"
-                value={formData.recipientDistrict}
+                value={formData.recipientDistrict} // সরাসরি formData থেকে value নেবে
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700 uppercase text-xs"
+                className={inputClasses}
                 required
               >
-                <option value="">Select Division</option>
+                <option value="">SELECT DIVISION</option>
                 {divisions.map((div) => (
-                  <option key={div.id} value={div.id}>
-                    {' '}
-                    {/* ID ব্যবহার করা হয়েছে ফিল্টারিংয়ের সুবিধার জন্য */}
+                  <option key={div.id} value={String(div.id)}>
                     {div.name}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Recipient District (আগে যেখানে Upazila ছিল) */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Recipient District
-              </label>
+            {/* District Selector: Ekhane value match korbe district name-er sathe */}
+            <div className="flex flex-col">
+              <label className={labelClasses}>Recipient District</label>
               <select
                 name="recipientUpazila"
-                value={formData.recipientUpazila}
+                value={formData.recipientUpazila} // District Name আসবে
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700 uppercase text-xs"
+                className={inputClasses}
                 required
                 disabled={!formData.recipientDistrict}
               >
-                <option value="">Select District</option>
+                <option value="">SELECT DISTRICT</option>
                 {allDistricts
                   .filter(
                     (dis) =>
@@ -189,91 +235,76 @@ const EditDonationRequest = () => {
               </select>
             </div>
 
-            {/* Hospital Name */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Hospital Name
-              </label>
+            {/* Baki fields: Hospital, Address, Date, Time */}
+            <div className="flex flex-col">
+              <label className={labelClasses}>Hospital Name</label>
               <input
                 type="text"
                 name="hospitalName"
                 value={formData.hospitalName}
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700"
-                placeholder="e.g. Dhaka Medical College"
+                className={inputClasses}
+                required
               />
             </div>
-
-            {/* Full Address */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Full Address
-              </label>
+            <div className="flex flex-col">
+              <label className={labelClasses}>Full Address</label>
               <input
                 type="text"
                 name="fullAddress"
                 value={formData.fullAddress}
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700"
-                placeholder="House, Road, Area details"
+                className={inputClasses}
+                required
               />
             </div>
-
-            {/* Date */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Donation Date
-              </label>
+            <div className="flex flex-col">
+              <label className={labelClasses}>Donation Date</label>
               <input
                 type="date"
                 name="donationDate"
                 value={formData.donationDate}
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700"
+                className={inputClasses}
+                required
               />
             </div>
-
-            {/* Time */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-                Donation Time
-              </label>
+            <div className="flex flex-col">
+              <label className={labelClasses}>Donation Time</label>
               <input
                 type="time"
                 name="donationTime"
                 value={formData.donationTime}
                 onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700"
+                className={inputClasses}
+                required
               />
             </div>
           </div>
 
-          {/* Message Area */}
-          <div className="flex flex-col gap-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2">
-              Why do you need blood? (Message)
-            </label>
+          <div className="flex flex-col">
+            <label className={labelClasses}>Reason / Message</label>
             <textarea
               name="requestMessage"
               value={formData.requestMessage}
               onChange={handleChange}
               rows="4"
-              className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700"
-              placeholder="Explain the situation..."
+              className={inputClasses + ' resize-none'}
+              required
             ></textarea>
           </div>
 
-          {/* Update Button */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-slate-900 transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
+            disabled={updateLoading}
+            className="w-full py-5 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-lg"
           >
-            {loading ? (
-              'Updating...'
+            {updateLoading ? (
+              <Loader2 className="animate-spin mx-auto" />
             ) : (
               <>
-                <Save size={20} /> Update Donation Request
+                <Save size={20} className="inline mr-2" /> Update Donation
+                Request
               </>
             )}
           </button>

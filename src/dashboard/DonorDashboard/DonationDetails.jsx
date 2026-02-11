@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react'; // useContext add kora hoyeche
 import { useParams, useNavigate } from 'react-router';
 import {
   MapPin,
@@ -14,49 +14,80 @@ import {
   Info,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import useAxiosSecure from '../../Hooks/useAxiosSecure'; // Path check korun
+import { AuthContext } from '../../providers/AuthProvider'; // Path check korun
 
 const DonationDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const axiosSecure = useAxiosSecure();
+  const { user: loggedInUser } = useContext(AuthContext); // Real logged in user context theke nilam
+
   const [request, setRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // User Context (Mock)
-  const loggedInUser = { name: 'Current User', email: 'user@example.com' };
-
+  // ১. ডাটাবেস থেকে স্পেসিফিক রিকোয়েস্ট আনা
   useEffect(() => {
-    // API Implementation: axiosSecure.get(`/donation-request/${id}`)
-    setRequest({
-      recipientName: 'Rahim Ali',
-      recipientDistrict: 'Dhaka',
-      recipientUpazila: 'Dhanmondi',
-      hospitalName: 'Dhaka Medical College Hospital',
-      fullAddress: 'Zahir Raihan Rd, Bakshibazar, Dhaka',
-      bloodGroup: 'O+',
-      donationDate: '2024-05-15',
-      donationTime: '10:30 AM',
-      requestMessage:
-        'Patient is undergoing heart surgery. Urgent blood donation is required by tomorrow morning. Your help could save a life.',
-      status: 'pending',
-    });
-  }, [id]);
+    const fetchRequestDetails = async () => {
+      try {
+        setLoading(true);
+        const res = await axiosSecure.get(`/donation-request/${id}`);
+        setRequest(res.data);
+      } catch (err) {
+        console.error('Error fetching details:', err);
+        Swal.fire('Error', 'Could not load donation details', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleConfirmDonation = (e) => {
+    if (id) fetchRequestDetails();
+  }, [id, axiosSecure]);
+
+  // ২. ডোনেশন কনফার্ম করার লজিক (Status 'inprogress' kora)
+  const handleConfirmDonation = async (e) => {
     e.preventDefault();
-    Swal.fire({
-      title: 'Success!',
-      text: 'You have committed to this donation.',
-      icon: 'success',
-      confirmButtonColor: '#dc2626',
-    });
-    document.getElementById('donate_modal').close();
+
+    const donationInfo = {
+      donorName: loggedInUser?.displayName || loggedInUser?.name,
+      donorEmail: loggedInUser?.email,
+      status: 'inprogress', // ডোনার কনফার্ম করলে স্ট্যাটাস ইন-প্রগ্রেস হবে
+    };
+
+    try {
+      const res = await axiosSecure.patch(
+        `/donation-request/${id}`,
+        donationInfo
+      );
+
+      if (res.data) {
+        Swal.fire({
+          title: 'Confirmed!',
+          text: 'Thank you for your commitment to save a life.',
+          icon: 'success',
+          confirmButtonColor: '#dc2626',
+          customClass: { popup: 'rounded-[30px]' },
+        });
+
+        // UI আপডেট করার জন্য লোকাল স্টেট আপডেট
+        setRequest({ ...request, ...donationInfo });
+        document.getElementById('donate_modal').close();
+      }
+    } catch (error) {
+      console.error('Confirmation Error:', error);
+      Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+    }
   };
 
-  if (!request)
+  if (loading)
     return (
       <div className="min-h-[400px] flex justify-center items-center">
-        <div className="loading loading-spinner loading-lg text-error"></div>
+        <span className="loading loading-spinner loading-lg text-error"></span>
       </div>
     );
+
+  if (!request)
+    return <div className="text-center py-20 font-bold">No Data Found</div>;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 animate-in fade-in duration-500">
@@ -71,13 +102,13 @@ const DonationDetails = () => {
           </button>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             Request{' '}
-            <span className="text-red-600 font-black">
-              #{id?.slice(-5) || 'Detail'}
-            </span>
+            <span className="text-red-600 font-black">#{id?.slice(-5)}</span>
           </h1>
         </div>
         <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-2xl shadow-sm">
-          <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]"></div>
+          <div
+            className={`w-3 h-3 rounded-full shadow-sm ${request.status === 'pending' ? 'bg-amber-500' : 'bg-blue-500'}`}
+          ></div>
           <span className="text-sm font-bold text-slate-700 uppercase tracking-wider">
             Status: {request.status}
           </span>
@@ -85,9 +116,7 @@ const DonationDetails = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Essential Info */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Main Card */}
           <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
             <div className="bg-slate-50 px-8 py-10 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-6">
               <div className="space-y-3">
@@ -100,7 +129,8 @@ const DonationDetails = () => {
                 <div className="flex items-center gap-2 text-slate-500 font-medium">
                   <MapPin size={18} className="text-red-500" />
                   <span>
-                    {request.recipientUpazila}, {request.recipientDistrict}
+                    {request.district || request.recipientUpazila},{' '}
+                    {request.division || request.recipientDistrict}
                   </span>
                 </div>
               </div>
@@ -156,16 +186,15 @@ const DonationDetails = () => {
             </div>
           </div>
 
-          {/* Message Box */}
           <div className="bg-slate-50 rounded-[2rem] p-8 border border-dashed border-slate-200">
             <div className="flex items-center gap-2 mb-4">
               <MessageSquare size={18} className="text-slate-400" />
               <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest">
-                Requester's Message
+                Message
               </h3>
             </div>
             <p className="text-slate-600 text-lg font-medium leading-relaxed">
-              "{request.requestMessage}"
+              "{request.message || request.requestMessage}"
             </p>
           </div>
         </div>
@@ -182,8 +211,8 @@ const DonationDetails = () => {
                 <div className="flex gap-3">
                   <Info className="text-red-500 shrink-0" size={18} />
                   <p className="text-xs font-semibold text-red-800 leading-relaxed">
-                    By clicking the button below, you are committing to donate
-                    blood for this person.
+                    By clicking confirm, you are promising to donate blood on
+                    time.
                   </p>
                 </div>
               </div>
@@ -199,29 +228,22 @@ const DonationDetails = () => {
                 </button>
               ) : (
                 <div className="p-5 text-center bg-slate-100 rounded-2xl">
-                  <p className="text-slate-500 font-bold text-sm">
-                    Unavailable
+                  <p className="text-slate-500 font-bold text-sm uppercase">
+                    Currently {request.status}
                   </p>
+                  {request.donorName && (
+                    <p className="text-[10px] text-slate-400 mt-1 font-bold tracking-widest uppercase">
+                      Picked by: {request.donorName}
+                    </p>
+                  )}
                 </div>
               )}
-
-              <div className="pt-4 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  <div className="w-1 h-1 rounded-full bg-slate-300"></div>{' '}
-                  Donor Requirements
-                </div>
-                <ul className="text-xs text-slate-500 space-y-2 font-medium">
-                  <li>• Must be physically healthy</li>
-                  <li>• Weight should be 50kg or above</li>
-                  <li>• Last donation was at least 4 months ago</li>
-                </ul>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Professional Modal */}
+      {/* Modal remains almost same but with dynamic names */}
       <dialog id="donate_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box rounded-[2.5rem] p-0 overflow-hidden bg-white max-w-md border-none">
           <div className="bg-red-600 p-8 text-center text-white">
@@ -231,9 +253,6 @@ const DonationDetails = () => {
             <h3 className="text-2xl font-black uppercase tracking-tight italic">
               Confirmation
             </h3>
-            <p className="text-red-100 text-xs font-bold uppercase tracking-widest mt-1">
-              Final Step
-            </p>
           </div>
 
           <div className="p-8">
@@ -249,9 +268,9 @@ const DonationDetails = () => {
                   />
                   <input
                     type="text"
-                    value={loggedInUser.name}
+                    value={loggedInUser?.displayName || 'Loading...'}
                     readOnly
-                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-bold text-sm focus:ring-0"
+                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-bold text-sm"
                   />
                 </div>
               </div>
@@ -267,9 +286,9 @@ const DonationDetails = () => {
                   />
                   <input
                     type="email"
-                    value={loggedInUser.email}
+                    value={loggedInUser?.email || 'Loading...'}
                     readOnly
-                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-bold text-sm focus:ring-0"
+                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-bold text-sm"
                   />
                 </div>
               </div>
@@ -286,7 +305,7 @@ const DonationDetails = () => {
                   onClick={() =>
                     document.getElementById('donate_modal').close()
                   }
-                  className="w-full py-4 bg-white text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-slate-600"
+                  className="w-full py-4 bg-white text-slate-400 font-bold uppercase tracking-widest text-[10px]"
                 >
                   Go Back
                 </button>

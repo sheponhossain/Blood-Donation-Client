@@ -20,12 +20,13 @@ const CreateDonationRequest = () => {
   const axiosSecure = useAxiosSecure();
 
   const [allDivisions, setAllDivisions] = useState([]);
+
   const [allDistricts, setAllDistricts] = useState([]);
   const [filteredDistricts, setFilteredDistricts] = useState([]);
   const [selectedDivisionId, setSelectedDivisionId] = useState('');
+  const [selectedDivisionName, setSelectedDivisionName] = useState('');
   const [startDate, setStartDate] = useState(new Date());
 
-  // Location Data Fetch
   useEffect(() => {
     fetch('/divisions.json')
       .then((res) => res.json())
@@ -36,14 +37,15 @@ const CreateDonationRequest = () => {
   }, []);
 
   const handleDivisionChange = (e) => {
+    const divName = e.target.options[e.target.selectedIndex].text;
     const divId = e.target.value;
     setSelectedDivisionId(divId);
+    setSelectedDivisionName(divName);
     setFilteredDistricts(
       allDistricts.filter((dis) => dis.division_id === divId)
     );
   };
 
-  // ১. লোডিং স্টেট হ্যান্ডেলিং (এতে 'status of null' এরর আসবে না)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -52,7 +54,6 @@ const CreateDonationRequest = () => {
     );
   }
 
-  // ২. ব্লকড ইউজার লজিক
   if (user?.status === 'blocked') {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
@@ -75,7 +76,6 @@ const CreateDonationRequest = () => {
     e.preventDefault();
     const form = e.target;
 
-    // Data Structure
     const requestData = {
       requesterName: user?.displayName || 'Anonymous',
       requesterEmail: user?.email,
@@ -84,7 +84,7 @@ const CreateDonationRequest = () => {
       hospitalName: form.hospitalName.value,
       fullAddress: form.fullAddress.value,
       district: form.district.value,
-      // Date-কে ISO স্ট্রিং এ রূপান্তর করা ভালো ডাটাবেসের জন্য
+      division: selectedDivisionName,
       donationDate: startDate.toISOString().split('T')[0],
       donationTime: form.donationTime.value,
       message: form.message.value,
@@ -92,7 +92,6 @@ const CreateDonationRequest = () => {
     };
 
     try {
-      // ৩. সার্ভারে ডাটা পাঠানো
       const res = await axiosSecure.post('/donation-requests', requestData);
 
       if (res.data.insertedId) {
@@ -304,7 +303,7 @@ const CreateDonationRequest = () => {
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-black py-5 rounded-[25px] shadow-xl hover:shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-3 text-xl uppercase italic tracking-widest"
+                className="w-full bg-gradient-to-r curp from-red-600 to-rose-600 text-white font-black py-5 rounded-[25px] shadow-xl hover:shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-3 text-xl uppercase italic tracking-widest"
               >
                 <FaPaperPlane className="text-lg" /> Post Blood Request
               </button>

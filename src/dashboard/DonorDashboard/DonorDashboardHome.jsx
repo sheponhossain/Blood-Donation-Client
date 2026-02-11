@@ -1,10 +1,8 @@
-import React, { useState, useContext } from 'react'; // useContext যোগ করা হয়েছে
+import React, { useState, useContext, useEffect } from 'react';
 import {
-  Plus,
   MapPin,
   Calendar,
   Clock,
-  Droplets,
   Edit2,
   Trash2,
   Eye,
@@ -20,60 +18,49 @@ import { AuthContext } from '../../providers/AuthProvider';
 import Welcome from '../../components/Welcome/Welcome';
 
 const DonorDashboardHome = () => {
-  // ১. AuthContext থেকে ইউজার ডেটা নিয়ে আসা
   const { user: authUser } = useContext(AuthContext);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // আপনার রিকোয়েস্ট স্টেট (এগুলো পরে ডাটাবেস থেকে আনতে পারবেন)
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      recipientName: 'Arif Ahmed',
-      district: 'Dhaka',
-      upazila: 'Mirpur',
-      date: '2024-11-20',
-      time: '10:00 AM',
-      bloodGroup: 'A+',
-      status: 'inprogress',
-      donorInfo: { name: 'Sumon Ali', email: 'sumon@example.com' },
-    },
-    {
-      id: 2,
-      recipientName: 'Saira Banu',
-      district: 'Chittagong',
-      upazila: 'Pahartali',
-      date: '2024-11-25',
-      time: '02:30 PM',
-      bloodGroup: 'O-',
-      status: 'pending',
-      donorInfo: null,
-    },
-    {
-      id: 3,
-      recipientName: 'Rakib Khan',
-      district: 'Rajshahi',
-      upazila: 'Sadar',
-      date: '2024-11-28',
-      time: '11:00 AM',
-      bloodGroup: 'B+',
-      status: 'done',
-      donorInfo: { name: authUser?.displayName, email: authUser?.email },
-    },
-  ]);
+  // --- ডাটাবেস থেকে ডাটা লোড করা ---
+  useEffect(() => {
+    if (authUser?.email) {
+      fetch(`http://localhost:5000/my-donation-requests/${authUser.email}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setRequests(data);
+          setLoading(false);
+        })
+        .catch((err) => console.error('Error fetching requests:', err));
+    }
+  }, [authUser]);
 
+  // --- স্ট্যাটাস আপডেট (Done/Canceled) ---
   const handleStatusChange = (id, newStatus) => {
-    setRequests(
-      requests.map((req) =>
-        req.id === id ? { ...req, status: newStatus } : req
-      )
-    );
-    Swal.fire({
-      title: 'Updated!',
-      text: `Status changed to ${newStatus}`,
-      icon: 'success',
-      confirmButtonColor: '#ef4444',
-    });
+    fetch(`http://localhost:5000/donation-request/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.modifiedCount > 0) {
+          setRequests(
+            requests.map((req) =>
+              req._id === id ? { ...req, status: newStatus } : req
+            )
+          );
+          Swal.fire({
+            title: 'Updated!',
+            text: `Status changed to ${newStatus}`,
+            icon: 'success',
+            confirmButtonColor: '#ef4444',
+          });
+        }
+      });
   };
 
+  // --- ডাটাবেস থেকে ডিলিট করা ---
   const handleDelete = (id) => {
     Swal.fire({
       title: 'Are you sure?',
@@ -85,19 +72,36 @@ const DonorDashboardHome = () => {
       confirmButtonText: 'Yes, delete it!',
     }).then((result) => {
       if (result.isConfirmed) {
-        setRequests(requests.filter((req) => req.id !== id));
-        Swal.fire('Deleted!', 'Your request has been deleted.', 'success');
+        fetch(`http://localhost:5000/donation-request/${id}`, {
+          method: 'DELETE',
+          headers: {
+            authorization: `Bearer ${localStorage.getItem('access-token')}`, // টোকেন থাকলে
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.deletedCount > 0) {
+              setRequests(requests.filter((req) => req._id !== id));
+              Swal.fire(
+                'Deleted!',
+                'Your request has been deleted.',
+                'success'
+              );
+            }
+          });
       }
     });
   };
 
   return (
     <div className="space-y-12">
-      {/* --- WELCOME SECTION (Dynamic Name Integrated) --- */}
-      {/* --- WELCOME SECTION --- */}
       <Welcome />
-      {/* --- RECENT REQUESTS TABLE --- */}
-      {requests.length > 0 && (
+
+      {loading ? (
+        <div className="text-center font-bold text-slate-400">
+          Loading requests...
+        </div>
+      ) : requests.length > 0 ? (
         <div className="bg-white rounded-[40px] shadow-xl shadow-slate-200/50 border border-slate-50 overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex justify-between items-center">
             <h2 className="text-xl font-black text-slate-800 tracking-widest flex items-center gap-3">
@@ -118,27 +122,30 @@ const DonorDashboardHome = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
+                {/* মাত্র ৩টি লেটেস্ট ডাটা দেখানোর জন্য slice */}
                 {requests.slice(0, 3).map((req) => (
                   <tr
-                    key={req.id}
+                    key={req._id}
                     className="hover:bg-slate-50/50 transition-all"
                   >
                     <td className="px-8 py-6 font-black text-slate-800">
                       {req.recipientName}
                     </td>
-                    <td className="px-8 py-6 flex items-center gap-2 text-xs font-bold text-slate-500 mt-6">
-                      <MapPin size={14} className="text-red-600" />
-                      {req.upazila}, {req.district}
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                        <MapPin size={14} className="text-red-600" />
+                        {req.district}, {req.division}
+                      </div>
                     </td>
                     <td className="px-8 py-6">
                       <div className="text-[10px] font-black text-slate-700 uppercase">
                         <div className="flex items-center gap-2">
                           <Calendar size={12} className="text-slate-400" />{' '}
-                          {req.date}
+                          {req.donationDate}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <Clock size={12} className="text-slate-400" />{' '}
-                          {req.time}
+                          {req.donationTime}
                         </div>
                       </div>
                     </td>
@@ -162,15 +169,16 @@ const DonorDashboardHome = () => {
                         >
                           {req.status}
                         </span>
-                        {req.status === 'inprogress' && req.donorInfo && (
+                        {/* যদি কোনো ডোনার এক্সেপ্ট করে থাকে */}
+                        {req.donorName && (
                           <div className="flex items-center gap-2 mt-2 p-2 bg-slate-50 rounded-xl border border-slate-100">
                             <User size={12} className="text-blue-600" />
                             <div>
                               <p className="text-[9px] font-black text-slate-800 uppercase">
-                                {req.donorInfo.name}
+                                {req.donorName}
                               </p>
                               <p className="text-[8px] font-bold text-slate-400">
-                                {req.donorInfo.email}
+                                {req.donorEmail}
                               </p>
                             </div>
                           </div>
@@ -182,14 +190,16 @@ const DonorDashboardHome = () => {
                         {req.status === 'inprogress' && (
                           <>
                             <button
-                              onClick={() => handleStatusChange(req.id, 'done')}
+                              onClick={() =>
+                                handleStatusChange(req._id, 'done')
+                              }
                               className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
                             >
                               <CheckCircle size={16} />
                             </button>
                             <button
                               onClick={() =>
-                                handleStatusChange(req.id, 'canceled')
+                                handleStatusChange(req._id, 'canceled')
                               }
                               className="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-600 hover:text-white transition-all"
                             >
@@ -198,19 +208,19 @@ const DonorDashboardHome = () => {
                           </>
                         )}
                         <Link
-                          to={`/dashboard/donation-details/${req.id}`}
+                          to={`/dashboard/donation-details/${req._id}`}
                           className="p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-slate-900 hover:text-white transition-all"
                         >
                           <Eye size={16} />
                         </Link>
                         <Link
-                          to={`/dashboard/edit-donation-request/${req.id}`}
+                          to={`/dashboard/edit-donation-request/${req._id}`}
                           className="p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-amber-500 hover:text-white transition-all"
                         >
                           <Edit2 size={16} />
                         </Link>
                         <button
-                          onClick={() => handleDelete(req.id)}
+                          onClick={() => handleDelete(req._id)}
                           className="p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-red-600 hover:text-white transition-all"
                         >
                           <Trash2 size={16} />
@@ -231,6 +241,18 @@ const DonorDashboardHome = () => {
               View My All Requests <ArrowRight size={14} />
             </Link>
           </div>
+        </div>
+      ) : (
+        <div className="text-center p-12 bg-white rounded-[40px] border border-dashed border-slate-200">
+          <p className="text-slate-400 font-bold">
+            No donation requests found.
+          </p>
+          <Link
+            to="/dashboard/create-donation-request"
+            className="text-red-600 text-xs font-black uppercase mt-4 inline-block hover:underline"
+          >
+            Create One Now
+          </Link>
         </div>
       )}
     </div>
