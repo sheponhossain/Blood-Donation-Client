@@ -24,6 +24,7 @@ const Navbar = () => {
     { name: 'Donation Requests', path: '/donation-requests' },
     { name: 'Blood Requests', path: '/blood-requests' },
     { name: 'Funding', path: '/funding' },
+    { name: 'Search', path: '/search' },
   ];
 
   const activeStyle =

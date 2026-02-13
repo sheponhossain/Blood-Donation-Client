@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   MapPin,
   Calendar,
   Clock,
-  Droplets,
   Edit2,
   Trash2,
   Eye,
@@ -19,101 +18,55 @@ import { Link } from 'react-router';
 import Swal from 'sweetalert2';
 
 const AllBloodDonationRequests = () => {
-  // ১. Fake Global Data (সব ইউজারের রিকোয়েস্ট এখানে থাকবে)
-  const [allRequests, setAllRequests] = useState([
-    {
-      id: 1,
-      recipientName: 'Rahim Ali',
-      district: 'Dhaka',
-      upazila: 'Mirpur',
-      date: '2024-05-15',
-      time: '10:30 AM',
-      bloodGroup: 'O+',
-      status: 'inprogress',
-      donor: { name: 'Sumon Khan', email: 'sumon@mail.com' },
-      requester: 'John Doe',
-    },
-    {
-      id: 2,
-      recipientName: 'Karim Uddin',
-      district: 'Chittagong',
-      upazila: 'Pahartali',
-      date: '2024-06-10',
-      time: '02:00 PM',
-      bloodGroup: 'A-',
-      status: 'pending',
-      donor: null,
-      requester: 'Musa Ibrahim',
-    },
-    {
-      id: 3,
-      recipientName: 'Sara Islam',
-      district: 'Sylhet',
-      upazila: 'Beanibazar',
-      date: '2024-05-20',
-      time: '11:00 AM',
-      bloodGroup: 'AB+',
-      status: 'done',
-      donor: { name: 'Kamal Hasan', email: 'kamal@mail.com' },
-      requester: 'Fatima Khatun',
-    },
-    {
-      id: 4,
-      recipientName: 'Abul Hasnat',
-      district: 'Barisal',
-      upazila: 'Sadar',
-      date: '2024-07-01',
-      time: '09:00 AM',
-      bloodGroup: 'B+',
-      status: 'canceled',
-      donor: null,
-      requester: 'Tanvir Ahmed',
-    },
-    {
-      id: 5,
-      recipientName: 'Liton Das',
-      district: 'Rajshahi',
-      upazila: 'Sadar',
-      date: '2024-08-05',
-      time: '03:00 PM',
-      bloodGroup: 'O+',
-      status: 'pending',
-      donor: null,
-      requester: 'Sakib Khan',
-    },
-  ]);
-
-  // ২. ফিল্টারিং এবং প্যাগিনেশন স্টেট
+  const [allRequests, setAllRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // ৩. ফিল্টারিং লজিক (Admin Global View)
-  const filteredData = useMemo(() => {
-    if (filterStatus === 'all') return allRequests;
-    return allRequests.filter((req) => req.status === filterStatus);
-  }, [allRequests, filterStatus]);
+  const fetchAllRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/donation-requests', {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem('access-token')}`,
+        },
+      });
+      const data = await response.json();
+      setAllRequests(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Fetch Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // ৪. প্যাগিনেশন লজিক
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  useEffect(() => {
+    fetchAllRequests();
+  }, []);
 
-  // ৫. অ্যাকশন হ্যান্ডলারসমূহ (Admin Privileges)
-  const handleStatusUpdate = (id, newStatus) => {
-    setAllRequests(
-      allRequests.map((req) =>
-        req.id === id ? { ...req, status: newStatus } : req
-      )
-    );
-    Swal.fire({
-      title: 'Success!',
-      text: `Status updated to ${newStatus}`,
-      icon: 'success',
-      confirmButtonColor: '#e11d48',
-    });
+  const handleStatusUpdate = async (id, newStatus) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/donation-request/${id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('access-token')}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+      const data = await response.json();
+      if (data.modifiedCount > 0) {
+        Swal.fire('Success!', `Status updated to ${newStatus}`, 'success');
+        fetchAllRequests();
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      Swal.fire('Error!', 'Failed to update status', 'error');
+    }
   };
 
   const handleDelete = (id) => {
@@ -124,21 +77,45 @@ const AllBloodDonationRequests = () => {
       showCancelButton: true,
       confirmButtonColor: '#e11d48',
       confirmButtonText: 'Yes, Delete',
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setAllRequests(allRequests.filter((req) => req.id !== id));
-        Swal.fire(
-          'Removed!',
-          'Request has been permanently deleted.',
-          'success'
-        );
+        try {
+          const response = await fetch(
+            `http://localhost:5000/donation-request/${id}`,
+            {
+              method: 'DELETE',
+              headers: {
+                authorization: `Bearer ${localStorage.getItem('access-token')}`,
+              },
+            }
+          );
+          const data = await response.json();
+          if (data.deletedCount > 0) {
+            fetchAllRequests();
+            Swal.fire('Removed!', 'Request has been deleted.', 'success');
+          }
+          // eslint-disable-next-line no-unused-vars
+        } catch (error) {
+          Swal.fire('Error!', 'Failed to delete', 'error');
+        }
       }
     });
   };
 
+  const filteredData = useMemo(() => {
+    if (filterStatus === 'all') return allRequests;
+    return allRequests.filter((req) => req.status === filterStatus);
+  }, [allRequests, filterStatus]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="animate-in fade-in duration-700">
-      {/* Header & Filter Section */}
+      {/* Header & Filter */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3 italic">
@@ -152,7 +129,6 @@ const AllBloodDonationRequests = () => {
           </p>
         </div>
 
-        {/* Global Status Filter */}
         <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
           <div className="p-2 text-slate-400">
             <Filter size={18} />
@@ -189,122 +165,144 @@ const AllBloodDonationRequests = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {paginatedData.map((req) => (
-                <tr
-                  key={req.id}
-                  className="hover:bg-slate-50/30 transition-all"
-                >
-                  <td className="px-8 py-6">
-                    <p className="font-black text-slate-800 tracking-tight">
-                      {req.recipientName}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 flex items-center gap-1 italic">
-                      <User size={10} className="text-red-500" /> Req by:{' '}
-                      {req.requester}
-                    </p>
-                  </td>
-                  <td className="px-8 py-6 text-xs font-bold text-slate-500">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={14} className="text-red-600" />{' '}
-                      {req.upazila}, {req.district}
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="text-[10px] font-black text-slate-700 uppercase">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Calendar size={12} className="text-red-500" />{' '}
-                        {req.date}
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <Clock size={12} /> {req.time}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-center">
-                    <span className="px-3 py-1 bg-red-600 text-white rounded-lg font-black text-xs">
-                      {req.bloodGroup}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span
-                      className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                        req.status === 'pending'
-                          ? 'bg-amber-50 text-amber-600 border-amber-100'
-                          : req.status === 'inprogress'
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
-                            : req.status === 'done'
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                              : 'bg-slate-100 text-slate-400 border-slate-200'
-                      }`}
-                    >
-                      {req.status}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6">
-                    {req.status === 'inprogress' && req.donor ? (
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <p className="text-[10px] font-black text-slate-800 uppercase leading-none">
-                          {req.donor.name}
-                        </p>
-                        <p className="text-[9px] font-bold text-slate-400 mt-1">
-                          {req.donor.email}
-                        </p>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] font-bold text-slate-300 uppercase italic">
-                        Not Assigned
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <div className="flex justify-end gap-1">
-                      {req.status === 'inprogress' && (
-                        <div className="flex gap-1 pr-2 border-r border-slate-100 mr-2">
-                          <button
-                            onClick={() => handleStatusUpdate(req.id, 'done')}
-                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg"
-                            title="Approve Done"
-                          >
-                            <CheckCircle size={18} />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleStatusUpdate(req.id, 'canceled')
-                            }
-                            className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg"
-                            title="Force Cancel"
-                          >
-                            <XCircle size={18} />
-                          </button>
-                        </div>
-                      )}
-                      <Link
-                        to={`/dashboard/donation-details/${req.id}`}
-                        className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg"
-                      >
-                        <Eye size={18} />
-                      </Link>
-                      <Link
-                        to={`/dashboard/edit-donation-request/${req.id}`}
-                        className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg"
-                      >
-                        <Edit2 size={18} />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(req.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="px-8 py-20 text-center font-black text-slate-400 animate-pulse"
+                  >
+                    LOADING DATA...
                   </td>
                 </tr>
-              ))}
+              ) : paginatedData.length > 0 ? (
+                paginatedData.map((req) => (
+                  <tr
+                    key={req._id}
+                    className="hover:bg-slate-50/30 transition-all group"
+                  >
+                    <td className="px-8 py-6">
+                      <p className="font-black text-slate-800 tracking-tight">
+                        {req.recipientName}
+                      </p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 flex items-center gap-1 italic">
+                        <User size={10} className="text-red-500" /> Req by:{' '}
+                        {req.requesterName}
+                      </p>
+                    </td>
+                    <td className="px-8 py-6 text-xs font-bold text-slate-500">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-red-600" />{' '}
+                        {req.district}, {req.upazila}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="text-[10px] font-black text-slate-700 uppercase">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Calendar size={12} className="text-red-500" />{' '}
+                          {req.donationDate}
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <Clock size={12} /> {req.donationTime}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-center">
+                      <span className="px-3 py-1 bg-red-600 text-white rounded-lg font-black text-xs">
+                        {req.bloodGroup}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span
+                        className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                          req.status === 'pending'
+                            ? 'bg-amber-50 text-amber-600 border-amber-100'
+                            : req.status === 'inprogress'
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
+                              : req.status === 'done'
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                : 'bg-slate-100 text-slate-400 border-slate-200'
+                        }`}
+                      >
+                        {req.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      {req.donorName ? (
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <p className="text-[10px] font-black text-slate-800 uppercase leading-none">
+                            {req.donorName}
+                          </p>
+                          <p className="text-[9px] font-bold text-slate-400 mt-1">
+                            {req.donorEmail}
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] font-bold text-slate-300 uppercase italic">
+                          Not Assigned
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <div className="flex justify-end gap-1">
+                        {req.status === 'inprogress' && (
+                          <div className="flex gap-1 pr-2 border-r border-slate-100 mr-2">
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(req._id, 'done')
+                              }
+                              className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg"
+                              title="Approve Done"
+                            >
+                              <CheckCircle size={18} />
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(req._id, 'canceled')
+                              }
+                              className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg"
+                              title="Force Cancel"
+                            >
+                              <XCircle size={18} />
+                            </button>
+                          </div>
+                        )}
+                        <Link
+                          to={`/dashboard/donation-details/${req._id}`}
+                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg"
+                        >
+                          <Eye size={18} />
+                        </Link>
+                        <Link
+                          to={`/dashboard/edit-donation-request/${req._id}`}
+                          className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg"
+                        >
+                          <Edit2 size={18} />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(req._id)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="px-8 py-10 text-center text-slate-400 font-bold"
+                  >
+                    No requests found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Global Pagination */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="p-8 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -314,7 +312,7 @@ const AllBloodDonationRequests = () => {
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-600 disabled:opacity-30 transition-all"
+                className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-600 disabled:opacity-30"
               >
                 <ChevronLeft size={18} />
               </button>
@@ -322,7 +320,7 @@ const AllBloodDonationRequests = () => {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`w-11 h-11 rounded-xl font-black text-xs transition-all ${currentPage === i + 1 ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'bg-white border border-slate-200 text-slate-400'}`}
+                  className={`w-11 h-11 rounded-xl font-black text-xs transition-all ${currentPage === i + 1 ? 'bg-slate-900 text-white shadow-xl' : 'bg-white border border-slate-200 text-slate-400'}`}
                 >
                   {i + 1}
                 </button>
@@ -332,7 +330,7 @@ const AllBloodDonationRequests = () => {
                   setCurrentPage((p) => Math.min(totalPages, p + 1))
                 }
                 disabled={currentPage === totalPages}
-                className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-600 disabled:opacity-30 transition-all"
+                className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-600 disabled:opacity-30"
               >
                 <ChevronRight size={18} />
               </button>

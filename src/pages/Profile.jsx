@@ -133,7 +133,7 @@ const Profile = () => {
         setIsEditable(false);
         Swal.fire({
           title: 'Success!',
-          text: 'Profile updated successfully in DB & Firebase.',
+          text: 'Profile updated successfully',
           icon: 'success',
           confirmButtonColor: '#e11d48',
         });
@@ -204,16 +204,11 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 w-full mt-10">
+              <div className="grid grid-cols-1 gap-4 w-1/2 mt-10">
                 <StatCard
                   label="Blood"
                   value={user.bloodGroup}
                   color="text-red-600"
-                />
-                <StatCard
-                  label="Rank"
-                  value={user.role === 'admin' ? 'Elite' : 'Gold'}
-                  color="text-amber-500"
                 />
               </div>
             </div>

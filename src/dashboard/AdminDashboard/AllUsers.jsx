@@ -1,10 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   MoreVertical,
   ShieldCheck,
-  UserMinus,
   UserPlus,
-  Search,
   Filter,
   ShieldAlert,
   UserCog,
@@ -13,63 +11,68 @@ import {
 import Swal from 'sweetalert2';
 
 const AllUsers = () => {
-  // ১. Fake Users Data
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: 'Ariful Islam',
-      email: 'arif@example.com',
-      avatar: 'https://i.pravatar.cc/150?u=1',
-      role: 'donor',
-      status: 'active',
-    },
-    {
-      id: 2,
-      name: 'Sultana Kamal',
-      email: 'sultana@example.com',
-      avatar: 'https://i.pravatar.cc/150?u=2',
-      role: 'volunteer',
-      status: 'blocked',
-    },
-    {
-      id: 3,
-      name: 'Mahfuz Ahmed',
-      email: 'mahfuz@example.com',
-      avatar: 'https://i.pravatar.cc/150?u=3',
-      role: 'donor',
-      status: 'active',
-    },
-    {
-      id: 4,
-      name: 'Tanvir Hossain',
-      email: 'tanvir@example.com',
-      avatar: 'https://i.pravatar.cc/150?u=4',
-      role: 'admin',
-      status: 'active',
-    },
-  ]);
-
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // ২. অ্যাকশন হ্যান্ডলারসমূহ
-  const updateUserStatus = (id, newStatus) => {
-    setUsers(users.map((u) => (u.id === id ? { ...u, status: newStatus } : u)));
-    Swal.fire('Success!', `User is now ${newStatus}`, 'success');
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/users', {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem('access-token')}`,
+        },
+      });
+      const data = await response.json();
+
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateUserRole = (id, newRole) => {
-    setUsers(users.map((u) => (u.id === id ? { ...u, role: newRole } : u)));
-    Swal.fire('Updated!', `Role changed to ${newRole}`, 'success');
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleUpdate = async (id, updatedField) => {
+    try {
+      const response = await fetch(`http://localhost:5000/users/update/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${localStorage.getItem('access-token')}`,
+        },
+        body: JSON.stringify(updatedField),
+      });
+      const data = await response.json();
+
+      if (data.modifiedCount > 0) {
+        Swal.fire({
+          title: 'Success!',
+          text: 'User updated successfully',
+          icon: 'success',
+          confirmButtonColor: '#0f172a',
+        });
+        fetchUsers();
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      Swal.fire('Error!', 'Something went wrong', 'error');
+    }
   };
 
-  // ৩. ফিল্টারিং লজিক
   const filteredUsers = useMemo(() => {
+    if (!Array.isArray(users)) return [];
     if (filterStatus === 'all') return users;
     return users.filter((u) => u.status === filterStatus);
   }, [users, filterStatus]);
 
   return (
-    <div className="animate-in fade-in duration-700">
+    <div className="animate-in fade-in duration-700 pb-10">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div>
@@ -80,7 +83,7 @@ const AllUsers = () => {
             USER MANAGEMENT
           </h1>
           <p className="text-slate-500 font-medium mt-1 ml-14">
-            Control user roles, status, and permissions.
+            Total {users.length} members found in database.
           </p>
         </div>
 
@@ -112,123 +115,155 @@ const AllUsers = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-slate-50/30 transition-all group"
-                >
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={user.avatar}
-                        className="w-12 h-12 rounded-2xl object-cover ring-2 ring-slate-50"
-                        alt=""
-                      />
-                      <p className="font-black text-slate-800 tracking-tight">
-                        {user.name}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
-                      <Mail size={14} className="text-slate-300" /> {user.email}
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span
-                      className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
-                        user.role === 'admin'
-                          ? 'bg-red-50 text-red-600 border-red-100'
-                          : user.role === 'volunteer'
-                            ? 'bg-blue-50 text-blue-600 border-blue-100'
-                            : 'bg-slate-50 text-slate-600 border-slate-100'
-                      }`}
-                    >
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span
-                      className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
-                        user.status === 'active'
-                          ? 'text-emerald-500'
-                          : 'text-rose-500'
-                      }`}
-                    >
-                      <div
-                        className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}
-                      />
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    {/* Three-dot Dropdown Menu */}
-                    <div className="dropdown dropdown-left dropdown-end">
-                      <label
-                        tabIndex={0}
-                        className="btn btn-ghost btn-sm p-1 hover:bg-slate-100 rounded-lg"
-                      >
-                        <MoreVertical size={20} className="text-slate-400" />
-                      </label>
-                      <ul
-                        tabIndex={0}
-                        className="dropdown-content z-[100] menu p-2 shadow-2xl bg-white rounded-2xl w-52 border border-slate-50"
-                      >
-                        {/* Status Toggle */}
-                        {user.status === 'active' ? (
-                          <li>
-                            <button
-                              onClick={() =>
-                                updateUserStatus(user.id, 'blocked')
-                              }
-                              className="text-rose-600 font-bold text-xs"
-                            >
-                              <ShieldAlert size={16} /> Block User
-                            </button>
-                          </li>
-                        ) : (
-                          <li>
-                            <button
-                              onClick={() =>
-                                updateUserStatus(user.id, 'active')
-                              }
-                              className="text-emerald-600 font-bold text-xs"
-                            >
-                              <ShieldCheck size={16} /> Unblock User
-                            </button>
-                          </li>
-                        )}
-
-                        <div className="divider my-1 opacity-50"></div>
-
-                        {/* Role Management */}
-                        {user.role !== 'volunteer' && (
-                          <li>
-                            <button
-                              onClick={() =>
-                                updateUserRole(user.id, 'volunteer')
-                              }
-                              className="font-bold text-xs text-blue-600"
-                            >
-                              <UserPlus size={16} /> Make Volunteer
-                            </button>
-                          </li>
-                        )}
-                        {user.role !== 'admin' && (
-                          <li>
-                            <button
-                              onClick={() => updateUserRole(user.id, 'admin')}
-                              className="font-bold text-xs text-red-600"
-                            >
-                              <ShieldCheck size={16} /> Make Admin
-                            </button>
-                          </li>
-                        )}
-                      </ul>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="px-8 py-20 text-center text-slate-400 font-black animate-pulse"
+                  >
+                    FETCHING USERS FROM DATABASE...
                   </td>
                 </tr>
-              ))}
+              ) : filteredUsers.length > 0 ? (
+                filteredUsers.map((user) => (
+                  <tr
+                    key={user._id}
+                    className="hover:bg-slate-50/30 transition-all group"
+                  >
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={
+                            user.avatar || 'https://i.ibb.co/vP097Y9/user.png'
+                          }
+                          className="w-12 h-12 rounded-2xl object-cover ring-2 ring-slate-50"
+                          alt={user.name}
+                        />
+                        <p className="font-black text-slate-800 tracking-tight">
+                          {user.name}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
+                        <Mail size={14} className="text-slate-300" />{' '}
+                        {user.email}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span
+                        className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+                          user.role === 'admin'
+                            ? 'bg-red-50 text-red-600 border-red-100'
+                            : user.role === 'volunteer'
+                              ? 'bg-blue-50 text-blue-600 border-blue-100'
+                              : 'bg-slate-50 text-slate-600 border-slate-100'
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span
+                        className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
+                          user.status === 'active'
+                            ? 'text-emerald-500'
+                            : 'text-rose-500'
+                        }`}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}
+                        />
+                        {user.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <div className="dropdown dropdown-left dropdown-end">
+                        <label
+                          tabIndex={0}
+                          className="btn btn-ghost btn-sm p-1 hover:bg-slate-100 rounded-lg cursor-pointer"
+                        >
+                          <MoreVertical size={20} className="text-slate-400" />
+                        </label>
+                        <ul
+                          tabIndex={0}
+                          className="dropdown-content z-[100] menu p-2 shadow-2xl bg-white rounded-2xl w-52 border border-slate-50"
+                        >
+                          {user.status === 'active' ? (
+                            <li>
+                              <button
+                                onClick={() =>
+                                  handleUpdate(user._id, { status: 'blocked' })
+                                }
+                                className="text-rose-600 font-bold text-xs"
+                              >
+                                <ShieldAlert size={16} /> Block User
+                              </button>
+                            </li>
+                          ) : (
+                            <li>
+                              <button
+                                onClick={() =>
+                                  handleUpdate(user._id, { status: 'active' })
+                                }
+                                className="text-emerald-600 font-bold text-xs"
+                              >
+                                <ShieldCheck size={16} /> Unblock User
+                              </button>
+                            </li>
+                          )}
+                          <div className="divider my-1 opacity-50"></div>
+                          {user.role !== 'volunteer' && (
+                            <li>
+                              <button
+                                onClick={() =>
+                                  handleUpdate(user._id, { role: 'volunteer' })
+                                }
+                                className="font-bold text-xs text-blue-600"
+                              >
+                                <UserPlus size={16} /> Make Volunteer
+                              </button>
+                            </li>
+                          )}
+                          {user.role !== 'admin' && (
+                            <li>
+                              <button
+                                onClick={() =>
+                                  handleUpdate(user._id, { role: 'admin' })
+                                }
+                                className="font-bold text-xs text-red-600"
+                              >
+                                <ShieldCheck size={16} /> Make Admin
+                              </button>
+                            </li>
+                          )}
+                          {user.role !== 'donor' && (
+                            <li>
+                              <button
+                                onClick={() =>
+                                  handleUpdate(user._id, { role: 'donor' })
+                                }
+                                className="font-bold text-xs text-slate-600"
+                              >
+                                <UserCog size={16} /> Make Donor
+                              </button>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="px-8 py-10 text-center text-slate-400 font-bold italic"
+                  >
+                    No users found matching this filter.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

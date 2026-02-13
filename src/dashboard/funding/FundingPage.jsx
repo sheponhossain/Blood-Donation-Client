@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 import {
   Heart,
-  DollarSign,
-  Users,
   X,
   ShieldCheck,
   CreditCard,
-  CheckCircle2,
   Smartphone,
-  Landmark,
+  CheckCircle2,
 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
@@ -18,8 +16,9 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import { AuthContext } from '../../providers/AuthProvider';
 
-// Assets (Ensure these paths are correct in your project)
+// Assets (Keep your existing imports)
 import bkashLogo from '../../assets/bkash-logo-png.png';
 import nagadLogo from '../../assets/nagan-logo-png.png';
 import rocketLogo from '../../assets/rocket-png.png';
@@ -29,245 +28,263 @@ import Mastercard from '../../assets/BankLogo/mastercard-icon.png';
 import DBBL from '../../assets/BankLogo/dutch-bangla-bank-logo.png';
 import IBBL from '../../assets/BankLogo/islami-bank-bangladesh-logo.png';
 
-const stripePromise = loadStripe('pk_test_your_key_here');
+const stripePromise = loadStripe(
+  'pk_test_51SzahMBpKiUaBuAyZcfHACkmBGcvTkrV2sHx1hwqUUF1OzYqczFDnu6a978CbAVJWBZ4H0bahJTGMt673wZGXZRT00l1WDZ3h8'
+);
 
-// --- Checkout Form Component ---
-const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess }) => {
+const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+  const [trxId, setTrxId] = useState('');
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!amount || Number(amount) <= 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'অ্যামাউন্ট দিন',
-        text: 'সঠিক পরিমাণ টাকা লিখুন।',
-        confirmButtonColor: '#EF4444',
-      });
-      return;
+  useEffect(() => {
+    const cardMethods = ['visa', 'mastercard', 'dbbl', 'ibbl'];
+    if (amount >= 10 && cardMethods.includes(selectedMethod)) {
+      axios
+        .post('http://localhost:5000/create-payment-intent', { price: amount })
+        .then((res) => setClientSecret(res.data.clientSecret))
+        .catch((err) => console.error(err));
     }
+  }, [amount, selectedMethod]);
 
-    if (!selectedMethod) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'মেথড সিলেক্ট করুন',
-        text: 'একটি পেমেন্ট মাধ্যম বেছে নিন।',
-        confirmButtonColor: '#EF4444',
-      });
-      return;
-    }
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) return Swal.fire('Error', 'Please login first', 'error');
     setProcessing(true);
 
-    // Simulated API Call / Stripe Payment
-    setTimeout(() => {
+    if (['bkash', 'nagad', 'rocket', 'upay'].includes(selectedMethod)) {
+      if (!trxId) {
+        Swal.fire('Required', 'Enter Transaction ID', 'warning');
+        setProcessing(false);
+        return;
+      }
+      onPaymentSuccess(Number(amount), selectedMethod, trxId);
       setProcessing(false);
-      onPaymentSuccess(Number(amount), selectedMethod);
-    }, 2000);
+      return;
+    }
+
+    if (!stripe || !elements || !clientSecret) {
+      setProcessing(false);
+      return;
+    }
+
+    const card = elements.getElement(CardElement);
+    const { paymentIntent, error } = await stripe.confirmCardPayment(
+      clientSecret,
+      {
+        payment_method: {
+          card,
+          billing_details: { name: user?.displayName, email: user?.email },
+        },
+      }
+    );
+
+    if (error) {
+      Swal.fire('Failed', error.message, 'error');
+      setProcessing(false);
+    } else if (paymentIntent.status === 'succeeded') {
+      onPaymentSuccess(Number(amount), selectedMethod, paymentIntent.id);
+      setProcessing(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4">
-      <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl mb-4 shadow-inner">
-        <CardElement
-          options={{ style: { base: { fontSize: '16px', color: '#1e293b' } } }}
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="mt-5">
+      {['bkash', 'nagad', 'rocket', 'upay'].includes(selectedMethod) ? (
+        <div className="mb-4">
+          <input
+            type="text"
+            required
+            placeholder="Transaction ID (e.g. 8N7X6W5Q)"
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-all font-mono text-sm uppercase text-center"
+            value={trxId}
+            onChange={(e) => setTrxId(e.target.value)}
+          />
+        </div>
+      ) : (
+        <div className="mb-4 p-3 border border-gray-200 rounded-xl bg-gray-50">
+          <CardElement
+            options={{
+              style: { base: { fontSize: '14px', color: '#424770' } },
+            }}
+          />
+        </div>
+      )}
+
       <button
         type="submit"
-        disabled={processing}
-        className="w-full bg-red-600 text-white font-black py-4 rounded-xl hover:bg-red-700 transition-all active:scale-[0.98] shadow-lg uppercase text-xs tracking-widest disabled:opacity-50"
+        disabled={processing || !selectedMethod || amount < 10}
+        className="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-100 disabled:bg-gray-200 disabled:shadow-none text-sm tracking-wide uppercase"
       >
-        {processing ? (
-          <div className="flex items-center justify-center gap-2">
-            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            Verifying Transaction...
-          </div>
-        ) : (
-          `Pay ৳${amount || '0'} Securely`
-        )}
+        {processing ? 'Processing...' : `Confirm ৳${amount || 0}`}
       </button>
     </form>
   );
 };
 
-// --- Main Funding Page Component ---
 const FundingPage = () => {
+  const { user } = useContext(AuthContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [selectedMethod, setSelectedMethod] = useState(null);
+  const [fundings, setFundings] = useState([]);
 
-  const allMethods = {
+  const mobileMethods = {
     bkash: bkashLogo,
     nagad: nagadLogo,
     rocket: rocketLogo,
     upay: upayLogo,
+  };
+  const bankingMethods = {
     visa: Visa,
     mastercard: Mastercard,
     dbbl: DBBL,
     ibbl: IBBL,
   };
+  const allLogos = { ...mobileMethods, ...bankingMethods };
 
-  const [funders, setFunders] = useState([
-    {
-      id: 1,
-      name: 'Arifur Rahman',
-      amount: 5000,
-      date: '08 Feb 2026',
-      method: 'bkash',
-      methodImg: bkashLogo,
-    },
-    {
-      id: 2,
-      name: 'Sumaiya Akhter',
-      amount: 2000,
-      date: '05 Feb 2026',
-      method: 'visa',
-      methodImg: Visa,
-    },
-    {
-      id: 3,
-      name: 'Tanvir Hossain',
-      amount: 10000,
-      date: '01 Feb 2026',
-      method: 'nagad',
-      methodImg: nagadLogo,
-    },
-  ]);
+  const fetchFundings = () =>
+    axios
+      .get('http://localhost:5000/payments')
+      .then((res) => setFundings(res.data));
+  useEffect(() => {
+    fetchFundings();
+  }, []);
 
-  const handlePaymentSuccess = (paidAmount, methodId) => {
-    const newDonation = {
-      id: Date.now(),
-      name: 'Anonymous Donor', // আপনি চাইলে ইউজারের নাম ইনপুট থেকে নিতে পারেন
+  const handlePaymentSuccess = async (paidAmount, methodId, transactionId) => {
+    const paymentData = {
+      userName: user?.displayName,
+      userEmail: user?.email,
+      userPhoto: user?.photoURL,
       amount: paidAmount,
-      date: new Date().toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }),
+      date: new Date(),
       method: methodId,
-      methodImg: allMethods[methodId],
+      transactionId,
+      status: 'success',
     };
-
-    // Update List & Close Modal
-    setFunders([newDonation, ...funders]);
-    setIsModalOpen(false);
-    setAmount('');
-    setSelectedMethod(null);
-
-    // Show Success Message
-    Swal.fire({
-      title: 'ধন্যবাদ!',
-      html: `<p>আপনার <b>৳${paidAmount}</b> অনুদান সফলভাবে গৃহীত হয়েছে।</p>`,
-      icon: 'success',
-      confirmButtonColor: '#EF4444',
-      timer: 3000,
-      customClass: { popup: 'rounded-[24px]' },
-    });
+    try {
+      const res = await axios.post(
+        'http://localhost:5000/payments',
+        paymentData
+      );
+      if (res.data.insertedId) {
+        fetchFundings();
+        setIsModalOpen(false);
+        setAmount('');
+        setSelectedMethod(null);
+        Swal.fire({
+          icon: 'success',
+          title: 'Thank You!',
+          text: 'Contribution successful.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#dc2626',
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#FBFBFC] pb-20 font-sans">
-      {/* Header Section */}
-      <div className="bg-slate-950 py-20 px-4 text-center text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-red-600/10 opacity-30"></div>
-        <div className="relative z-10">
-          <h1 className="text-4xl md:text-6xl font-black italic uppercase mb-6 tracking-tighter">
-            Support Our <span className="text-red-600">Blood Network</span>
-          </h1>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-red-600 text-white px-12 py-4 rounded-2xl font-black text-lg hover:bg-red-700 transition-all shadow-xl uppercase italic"
-          >
-            Contribute Now
-          </button>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 pb-20 font-sans">
+      <div className="bg-white px-6 py-20 text-center border-b border-slate-100">
+        <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
+          Support Our <span className="text-red-600">Mission</span>
+        </h1>
+        <p className="text-slate-500 text-sm md:text-base max-w-md mx-auto mb-8 font-medium">
+          Your contribution helps us save lives through our blood network.
+        </p>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-red-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:bg-red-700 transition-all active:scale-95 uppercase tracking-tight"
+        >
+          Donate Now
+        </button>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 -mt-12 relative z-20">
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {[
-            {
-              l: 'Total Raised',
-              v: `৳ ${funders.reduce((a, b) => a + b.amount, 0).toLocaleString()}`,
-              i: <DollarSign className="text-green-500" />,
-            },
-            {
-              l: 'Total Backers',
-              v: funders.length,
-              i: <Users className="text-blue-500" />,
-            },
-            {
-              l: 'Lives Saved',
-              v: '1,240',
-              i: <Heart className="text-red-500" />,
-            },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              className="bg-white p-8 rounded-[35px] shadow-xl border border-slate-50 flex items-center gap-6"
-            >
-              <div className="bg-slate-50 p-4 rounded-2xl">{stat.i}</div>
-              <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  {stat.l}
-                </p>
-                <h3 className="text-2xl font-black text-slate-800">{stat.v}</h3>
-              </div>
-            </div>
-          ))}
+      <div className="max-w-5xl mx-auto px-6 -mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+          <StatCard
+            label="Total Raised"
+            value={`৳${fundings.reduce((a, b) => a + Number(b.amount), 0).toLocaleString()}`}
+          />
+          <StatCard label="Donors" value={fundings.length} />
+          <StatCard label="Impact" value="1.2k+" />
         </div>
 
-        {/* Transaction History */}
-        <div className="bg-white rounded-[40px] shadow-2xl border border-slate-100 overflow-hidden">
-          <div className="p-8 border-b bg-slate-50/50 flex justify-between items-center">
-            <h2 className="text-xl font-black italic uppercase text-slate-800">
-              History
-            </h2>
-            <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-full font-black text-[10px] uppercase">
-              <ShieldCheck className="w-4 h-4" /> SSL Secure
-            </div>
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="px-8 py-5 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+              Donor Recognition
+            </h3>
+            <span className="text-[10px] font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">
+              Live Updates
+            </span>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-slate-400 text-[10px] uppercase font-black tracking-widest border-b border-slate-50">
-                  <th className="px-10 py-5">Donor Name</th>
-                  <th className="px-10 py-5">Amount</th>
-                  <th className="px-10 py-5">Payment Method</th>
-                  <th className="px-10 py-5 text-right">Date</th>
-                </tr>
-              </thead>
+            <table className="w-full text-left border-collapse">
               <tbody className="divide-y divide-slate-50">
-                {funders.map((f) => (
+                {fundings.map((f, i) => (
                   <tr
-                    key={f.id}
-                    className="hover:bg-slate-50/80 transition-all font-bold group"
+                    key={i}
+                    className="hover:bg-slate-50/80 transition-all group"
                   >
-                    <td className="px-10 py-6 text-slate-700 uppercase">
-                      {f.name}
+                    {/* User Info with Avatar */}
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm border border-white shadow-sm shrink-0">
+                          {f.userName?.charAt(0) || 'D'}
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-800 text-sm tracking-tight group-hover:text-red-600 transition-colors">
+                            {f.userName}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-medium lowercase">
+                            {f.userEmail}
+                          </div>
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-10 py-6 font-black text-xl text-slate-900 group-hover:text-red-600">
-                      ৳{f.amount}
+
+                    {/* Amount with Highlight */}
+                    <td className="px-8 py-5">
+                      <div className="flex flex-col">
+                        <span className="text-red-600 font-black text-lg tracking-tighter">
+                          ৳{f.amount}
+                        </span>
+                        <span className="text-[9px] text-slate-300 uppercase font-bold tracking-widest">
+                          Contribution
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-10 py-6">
-                      <div className="flex items-center gap-3 bg-slate-100 w-fit px-4 py-2 rounded-xl border border-slate-200">
-                        <img
-                          src={f.methodImg}
-                          alt={f.method}
-                          className="h-5 w-auto object-contain"
-                        />
-                        <span className="text-[9px] font-black uppercase text-slate-500">
+
+                    {/* Method - Now clearly visible */}
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-slate-50 rounded-xl border border-slate-100 group-hover:border-red-100 group-hover:bg-white transition-all">
+                          <img
+                            src={allLogos[f.method]}
+                            className="h-5 w-auto object-contain"
+                            alt={f.method}
+                          />
+                        </div>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter hidden sm:block">
                           {f.method}
                         </span>
                       </div>
                     </td>
-                    <td className="px-10 py-6 text-right text-slate-400 text-xs italic">
-                      {f.date}
+
+                    {/* Date */}
+                    <td className="px-8 py-5 text-right">
+                      <div className="text-slate-400 font-bold text-[10px] bg-slate-50 px-3 py-1.5 rounded-lg inline-block group-hover:bg-white transition-all">
+                        {new Date(f.date).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -277,126 +294,122 @@ const FundingPage = () => {
         </div>
       </div>
 
-      {/* Modal Section */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
             onClick={() => setIsModalOpen(false)}
           ></div>
-          <div className="relative bg-white w-full max-w-lg rounded-[45px] shadow-2xl overflow-hidden animate-in zoom-in duration-300 max-h-[92vh] flex flex-col">
-            <div className="bg-slate-900 p-8 text-white flex justify-between items-center shrink-0">
+          <div className="relative bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
               <div className="flex items-center gap-3">
-                <div className="bg-red-600 p-3 rounded-2xl">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <h3 className="font-black uppercase tracking-widest text-xs italic">
-                  Safe Donation
+                <img
+                  src={user?.photoURL || 'https://via.placeholder.com/40'}
+                  className="w-8 h-8 rounded-full border border-red-100"
+                  alt=""
+                />
+                <h3 className="font-bold text-slate-800 tracking-tight">
+                  Secure Donation
                 </h3>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="bg-white/10 p-2 rounded-full hover:bg-white/20"
+                className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full transition-all"
               >
-                <X className="w-5 h-5" />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="p-8 overflow-y-auto custom-scrollbar">
-              <div className="mb-8">
-                <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block">
+            <div className="p-7">
+              <div className="mb-6">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">
                   Amount (BDT)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-300 text-2xl">
-                    ৳
-                  </span>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="500"
-                    className="w-full pl-12 pr-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-3xl focus:border-red-500 outline-none font-black text-4xl"
-                  />
                 </div>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-red-500 outline-none font-bold text-3xl transition-all shadow-inner"
+                />
               </div>
 
-              {/* Mobile Banking Grid */}
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Smartphone className="w-4 h-4 text-red-600" />
-                  <span className="text-[10px] font-black uppercase text-slate-600">
-                    Mobile Banking
-                  </span>
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                  {Object.entries(allMethods)
-                    .slice(0, 4)
-                    .map(([id, img]) => (
-                      <div
-                        key={id}
-                        onClick={() => setSelectedMethod(id)}
-                        className={`relative h-16 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-center p-3 ${selectedMethod === id ? 'border-red-500 bg-red-50 scale-105 shadow-lg' : 'border-slate-50 bg-slate-50'}`}
-                      >
-                        <img
-                          src={img}
-                          alt={id}
-                          className="h-full w-full object-contain"
-                        />
-                        {selectedMethod === id && (
-                          <CheckCircle2 className="absolute -top-2 -right-2 w-5 h-5 text-red-600 bg-white rounded-full shadow-md" />
-                        )}
-                      </div>
-                    ))}
-                </div>
+              <div className="space-y-6">
+                <MethodGrid
+                  title="Mobile Wallet"
+                  icon={<Smartphone size={12} />}
+                  methods={mobileMethods}
+                  selected={selectedMethod}
+                  onSelect={setSelectedMethod}
+                />
+                <MethodGrid
+                  title="Banking & Cards"
+                  icon={<CreditCard size={12} />}
+                  methods={bankingMethods}
+                  selected={selectedMethod}
+                  onSelect={setSelectedMethod}
+                />
               </div>
 
-              {/* Card Grid */}
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Landmark className="w-4 h-4 text-red-600" />
-                  <span className="text-[10px] font-black uppercase text-slate-600">
-                    Bank Cards
-                  </span>
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                  {Object.entries(allMethods)
-                    .slice(4)
-                    .map(([id, img]) => (
-                      <div
-                        key={id}
-                        onClick={() => setSelectedMethod(id)}
-                        className={`relative h-16 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-center p-3 ${selectedMethod === id ? 'border-red-500 bg-red-50 scale-105 shadow-lg' : 'border-slate-50 bg-slate-50'}`}
-                      >
-                        <img
-                          src={img}
-                          alt={id}
-                          className="h-full w-full object-contain"
-                        />
-                        {selectedMethod === id && (
-                          <CheckCircle2 className="absolute -top-2 -right-2 w-5 h-5 text-red-600 bg-white rounded-full shadow-md" />
-                        )}
-                      </div>
-                    ))}
-                </div>
-              </div>
+              <Elements stripe={stripePromise}>
+                <CheckoutForm
+                  amount={amount}
+                  selectedMethod={selectedMethod}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  user={user}
+                />
+              </Elements>
 
-              <div className="pt-6 border-t border-slate-100">
-                <Elements stripe={stripePromise}>
-                  <CheckoutForm
-                    amount={amount}
-                    selectedMethod={selectedMethod}
-                    onPaymentSuccess={handlePaymentSuccess}
-                  />
-                </Elements>
+              <div className="mt-6 flex items-center justify-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                <ShieldCheck size={12} className="text-green-500" /> SSL Secure
+                Payment
               </div>
             </div>
           </div>
         </div>
       )}
-      <style>{`.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }`}</style>
     </div>
   );
 };
+
+const MethodGrid = ({ title, icon, methods, selected, onSelect }) => (
+  <div>
+    <div className="flex items-center gap-1.5 text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-3 ml-1">
+      {icon} {title}
+    </div>
+    <div className="grid grid-cols-4 gap-2.5">
+      {Object.entries(methods).map(([id, img]) => (
+        <button
+          key={id}
+          onClick={() => onSelect(id)}
+          className={`relative aspect-square p-2.5 border rounded-xl transition-all flex items-center justify-center bg-white ${
+            selected === id
+              ? 'border-red-500 bg-red-50/30 ring-2 ring-red-500/10'
+              : 'border-slate-100 hover:border-slate-200'
+          }`}
+        >
+          <img src={img} className="h-full w-full object-contain" alt={id} />
+          {selected === id && (
+            <CheckCircle2
+              size={12}
+              className="absolute -top-1.5 -right-1.5 text-red-600 bg-white rounded-full"
+            />
+          )}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+const StatCard = ({ label, value }) => (
+  <div className="bg-white p-7 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:translate-y-[-2px] transition-all">
+    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">
+      {label}
+    </p>
+    <h3 className="text-2xl font-extrabold text-slate-800 tracking-tight lowercase">
+      {value}
+    </h3>
+  </div>
+);
 
 export default FundingPage;

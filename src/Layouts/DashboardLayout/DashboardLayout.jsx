@@ -14,7 +14,7 @@ import {
 const DashboardLayout = () => {
   const [user, setUser] = useState({
     name: 'Test User',
-    role: 'admin',
+    role: 'donor',
   });
 
   const toggleRole = (newRole) => {
@@ -52,7 +52,6 @@ const DashboardLayout = () => {
             </div>
           </div>
 
-          {/* ২. Role Switcher UI: এটি শুধু ডেভেলপমেন্টের সময় চেক করার জন্য */}
           <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
             <span className="text-[10px] font-black uppercase px-2 text-slate-500 flex items-center gap-1">
               <FaExchangeAlt size={10} /> Role:
@@ -157,16 +156,6 @@ const DashboardLayout = () => {
                     <FaList className="size-4" /> All Requests
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink
-                    to="/dashboard/content-management"
-                    className={({ isActive }) =>
-                      isActive ? 'bg-red-600 text-white' : ''
-                    }
-                  >
-                    <FaHandHoldingHeart className="size-4" /> Content
-                  </NavLink>
-                </li>
               </>
             )}
 
@@ -205,18 +194,19 @@ const DashboardLayout = () => {
               </>
             )}
 
-            {user.role !== 'donor' && (
-              <li>
-                <NavLink
-                  to="/dashboard/funding"
-                  className={({ isActive }) =>
-                    isActive ? 'bg-red-600 text-white' : ''
-                  }
-                >
-                  <FaDonate className="size-4" /> Funding
-                </NavLink>
-              </li>
-            )}
+            {user.role !== 'donor' ||
+              (user.role !== 'volunteer' && (
+                <li>
+                  <NavLink
+                    to="/dashboard/funding"
+                    className={({ isActive }) =>
+                      isActive ? 'bg-red-600 text-white' : ''
+                    }
+                  >
+                    <FaDonate className="size-4" /> Funding
+                  </NavLink>
+                </li>
+              ))}
 
             <div className="mt-auto border-t pt-4">
               <li>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useContext } from 'react'; // useEffect o useContext add kora hoyeche
+import React, { useState, useMemo, useEffect, useContext } from 'react';
 import {
   Edit2,
   Trash2,
@@ -6,7 +6,6 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
-  LayoutList,
   MapPin,
   Clock,
   Calendar,
@@ -22,12 +21,11 @@ const MyDonationRequests = () => {
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line no-unused-vars
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all'); // ডিফল্ট ফিল্টার
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
-  // ২. Database theke data fetch kora
+  const itemsPerPage = 6;
+
   useEffect(() => {
     if (user?.email) {
       axiosSecure
@@ -43,79 +41,89 @@ const MyDonationRequests = () => {
     }
   }, [user?.email, axiosSecure]);
 
-  // ৩. Delete Logic (Real Delete from DB)
   const handleDelete = (id) => {
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#e11d48', // Red color for confirm
-      cancelButtonColor: '#1e293b', // Slate color for cancel
+      confirmButtonColor: '#e11d48',
       confirmButtonText: 'Yes, delete it!',
-      customClass: {
-        popup: 'rounded-[30px]', // আপনার থিমের সাথে মিল রেখে
-      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Backend API call
           const res = await axiosSecure.delete(`/donation-request/${id}`);
-
-          // Mongoose/MongoDB delete result check
           if (res.data.deletedCount > 0) {
-            const remainingRequests = requests.filter((req) => req._id !== id);
-            setRequests(remainingRequests);
-
-            if (paginatedData.length === 1 && currentPage > 1) {
-              setCurrentPage(currentPage - 1);
-            }
-
-            // ২. সাকসেস মেসেজ
-            Swal.fire({
-              title: 'Deleted!',
-              text: 'Your request has been removed.',
-              icon: 'success',
-              confirmButtonColor: '#e11d48',
-              customClass: { popup: 'rounded-[30px]' },
-            });
+            setRequests((prevRequests) =>
+              prevRequests.filter((req) => req._id !== id)
+            );
+            Swal.fire(
+              'Deleted!',
+              'Successfully removed from database.',
+              'success'
+            );
           }
         } catch (error) {
-          console.error('Delete error:', error);
-          Swal.fire({
-            title: 'Error!',
-            text: error.response?.data?.message || 'Failed to delete request',
-            icon: 'error',
-            confirmButtonColor: '#e11d48',
-          });
+          console.error('Full Error:', error.response);
+          Swal.fire('Error!', 'Something went wrong', 'error');
         }
       }
     });
   };
 
-  // ৪. ফিল্টারিং লজিক (Database data-r property name check korun)
+  // ২. ফিল্টারিং লজিক (নতুনভাবে হ্যান্ডেল করা হয়েছে)
   const filteredData = useMemo(() => {
-    if (filterStatus === 'all') return requests;
-    return requests.filter((req) => req.status === filterStatus);
+    return filterStatus === 'all'
+      ? requests
+      : requests.filter((req) => req.status === filterStatus);
   }, [requests, filterStatus]);
 
-  // eslint-disable-next-line no-unused-vars
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(start, start + itemsPerPage);
+  }, [filteredData, currentPage]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (loading)
     return (
-      <div className="text-center py-20 font-black italic">
-        Loading Requests...
-      </div>
+      <div className="text-center py-20 font-black italic">Loading...</div>
     );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* ... (Header section exactly same thakbe) ... */}
+    <div className="space-y-6 animate-in fade-in duration-700 pb-10">
+      {/* Header & Filter Section */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-[30px] border border-slate-100 shadow-sm">
+        <h2 className="text-xl font-black text-slate-800 uppercase italic tracking-tight">
+          My <span className="text-red-600">Donation</span> Requests
+        </h2>
+
+        {/* --- ফিল্টার ড্রপডাউন --- */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-widest">
+            <Filter size={14} /> Filter:
+          </div>
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setCurrentPage(1); // ফিল্টার চেঞ্জ হলে ১ম পেজে নিয়ে আসবে
+            }}
+            className="bg-slate-50 border-none px-4 py-2 rounded-xl font-bold text-xs text-slate-700 focus:ring-2 focus:ring-red-500 outline-none transition-all cursor-pointer"
+          >
+            <option value="all">ALL REQUESTS</option>
+            <option value="pending">PENDING</option>
+            <option value="inprogress">INPROGRESS</option>
+            <option value="done">DONE</option>
+            <option value="canceled">CANCELED</option>
+          </select>
+        </div>
+      </div>
 
       {/* Table Section */}
       <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-50 overflow-hidden">
@@ -128,7 +136,6 @@ const MyDonationRequests = () => {
                 <th className="px-8 py-6">Date & Time</th>
                 <th className="px-8 py-6 text-center">Group</th>
                 <th className="px-8 py-6">Status</th>
-                <th className="px-8 py-6">Donor Info</th>
                 <th className="px-8 py-6 text-right">Actions</th>
               </tr>
             </thead>
@@ -139,25 +146,22 @@ const MyDonationRequests = () => {
                     key={req._id}
                     className="hover:bg-slate-50/50 transition-all group"
                   >
-                    <td className="px-8 py-6 font-black text-slate-800 tracking-tight">
+                    <td className="px-8 py-6 font-black text-slate-800">
                       {req.recipientName}
                     </td>
-                    <td className="px-8 py-6 text-slate-500 font-bold text-xs uppercase italic tracking-tighter">
-                      <div className="flex items-center gap-1">
+                    <td className="px-8 py-6 text-slate-500 font-bold text-xs italic">
+                      <div className="flex items-center gap-1 text-[10px]">
                         <MapPin size={12} className="text-red-500" />{' '}
-                        {req.district} {/* Location er jaygay req.district */}
+                        {req.district}, {req.division}
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <div className="text-[10px] font-black text-slate-700 flex flex-col gap-1 uppercase">
+                      <div className="text-[10px] font-black text-slate-700 flex flex-col uppercase">
                         <span className="flex items-center gap-1">
-                          <Calendar size={12} className="text-slate-400" />{' '}
-                          {req.donationDate}{' '}
-                          {/* Backend property name check korun */}
+                          <Calendar size={12} /> {req.donationDate}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock size={12} className="text-slate-400" />{' '}
-                          {req.donationTime}
+                          <Clock size={12} /> {req.donationTime}
                         </span>
                       </div>
                     </td>
@@ -171,49 +175,33 @@ const MyDonationRequests = () => {
                         className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
                           req.status === 'pending'
                             ? 'bg-amber-50 text-amber-600 border-amber-100'
-                            : 'bg-blue-600 text-white'
+                            : req.status === 'inprogress'
+                              ? 'bg-blue-50 text-blue-600 border-blue-100'
+                              : req.status === 'done'
+                                ? 'bg-green-50 text-green-600 border-green-100'
+                                : 'bg-slate-50 text-slate-500 border-slate-100'
                         }`}
                       >
                         {req.status}
                       </span>
                     </td>
-                    {/* Donor Info */}
-                    <td className="px-8 py-6">
-                      {req.donorName ? (
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-black">
-                            {req.donorName}
-                          </span>
-                          <span className="text-[9px] text-slate-400">
-                            {req.donorEmail}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-[10px] italic text-slate-300">
-                          No Donor Yet
-                        </span>
-                      )}
-                    </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex justify-end gap-1">
-                        {/* Edit Button */}
                         <Link
                           to={`/dashboard/edit-donation-request/${req._id}`}
-                          className="p-2 text-slate-400 hover:text-amber-500"
+                          className="p-2 text-slate-400 hover:text-amber-500 transition-colors"
                         >
                           <Edit2 size={16} />
                         </Link>
-                        {/* Delete Button */}
                         <button
                           onClick={() => handleDelete(req._id)}
-                          className="p-2 text-slate-400 hover:text-red-600"
+                          className="p-2 text-slate-400 hover:text-red-600 transition-colors"
                         >
                           <Trash2 size={16} />
                         </button>
-                        {/* View Button */}
                         <Link
                           to={`/dashboard/donation-details/${req._id}`}
-                          className="p-2 text-slate-400 hover:text-blue-600"
+                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
                         >
                           <Eye size={16} />
                         </Link>
@@ -224,17 +212,58 @@ const MyDonationRequests = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="7"
-                    className="px-8 py-20 text-center font-black text-slate-300"
+                    colSpan="6"
+                    className="px-8 py-20 text-center font-black text-slate-300 uppercase italic tracking-widest"
                   >
-                    No requests found
+                    No {filterStatus !== 'all' ? filterStatus : ''} requests
+                    found
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        {/* Pagination logic exactly same thakbe */}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="bg-slate-50/50 px-8 py-6 flex items-center justify-between border-t border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              Showing {paginatedData.length} of {filteredData.length} Requests
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-all"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${
+                    currentPage === index + 1
+                      ? 'bg-red-600 text-white shadow-lg shadow-red-200'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-all"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

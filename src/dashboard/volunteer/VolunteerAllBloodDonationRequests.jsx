@@ -7,89 +7,32 @@ import {
   Activity,
   ShieldCheck,
   Eye,
-  CheckCircle,
-  XCircle,
   Lock,
   Search,
-  ArrowUpDown,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import Swal from 'sweetalert2';
-import useAxiosSecure from '../../hooks/useAxiosSecure';
+import useAxiosSecure from '../../Hooks/useAxiosSecure';
 
 const VolunteerAllBloodDonationRequests = () => {
   const axiosSecure = useAxiosSecure();
   const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const fakeRequests = [
-    {
-      _id: '1',
-      recipientName: 'Ariful Islam',
-      recipientDistrict: 'Dhaka',
-      recipientUpazila: 'Dhanmondi',
-      bloodGroup: 'O+',
-      status: 'inprogress',
-      donorName: 'Rahat Khan',
-      donorEmail: 'rahat@gmail.com',
-      requesterName: 'Sumi Akter',
-    },
-    {
-      _id: '2',
-      recipientName: 'Kamal Uddin',
-      recipientDistrict: 'Chittagong',
-      recipientUpazila: 'Pahartali',
-      bloodGroup: 'A-',
-      status: 'pending',
-      donorName: null,
-      donorEmail: null,
-      requesterName: 'Anwar Hossain',
-    },
-    {
-      _id: '3',
-      recipientName: 'Nusrat Jahan',
-      recipientDistrict: 'Sylhet',
-      recipientUpazila: 'Zindabazar',
-      bloodGroup: 'B+',
-      status: 'done',
-      donorName: 'Sajid Hasan',
-      donorEmail: 'sajid@yahoo.com',
-      requesterName: 'Fahim Shahriar',
-    },
-    {
-      _id: '4',
-      recipientName: 'Zakir Hossain',
-      recipientDistrict: 'Rajshahi',
-      recipientUpazila: 'Motihar',
-      bloodGroup: 'AB+',
-      status: 'canceled',
-      donorName: null,
-      donorEmail: null,
-      requesterName: 'Emon Ahmed',
-    },
-    {
-      _id: '5',
-      recipientName: 'Mst. Rokeya',
-      recipientDistrict: 'Barisal',
-      recipientUpazila: 'Sadar',
-      bloodGroup: 'O-',
-      status: 'inprogress',
-      donorName: 'Tanvir Sadek',
-      donorEmail: 'tanvir@outlook.com',
-      requesterName: 'Jashim Uddin',
-    },
-  ];
-
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        // const res = await axiosSecure.get('/all-blood-donation-requests');
-        // setRequests(res.data);
-        setRequests(fakeRequests);
+        setLoading(true);
+        const res = await axiosSecure.get('/donation-requests');
+        setRequests(res.data);
       } catch (error) {
         console.error('Error fetching requests:', error);
+        Swal.fire('Error', 'Failed to load requests from server', 'error');
+      } finally {
+        setLoading(false);
       }
     };
     fetchRequests();
@@ -101,32 +44,28 @@ const VolunteerAllBloodDonationRequests = () => {
       text: `Are you sure you want to change status to ${newStatus}?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#0f172a',
-      cancelButtonColor: '#f1f5f9',
-      confirmButtonText: 'Yes, Update',
-      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#94a3b8',
+      confirmButtonText: 'Yes, Confirm',
     });
 
     if (result.isConfirmed) {
       try {
-        const res = await axiosSecure.patch(`/donation-request/status/${id}`, {
+        const res = await axiosSecure.patch(`/donation-request/${id}`, {
           status: newStatus,
         });
-        if (res.data.modifiedCount > 0) {
-          setRequests(
-            requests.map((req) =>
+
+        if (res.data.modifiedCount > 0 || res.data.acknowledged) {
+          setRequests((prev) =>
+            prev.map((req) =>
               req._id === id ? { ...req, status: newStatus } : req
             )
           );
-          Swal.fire(
-            'Updated!',
-            `Request status changed to ${newStatus}.`,
-            'success'
-          );
+          Swal.fire('Updated!', `Status changed to ${newStatus}.`, 'success');
         }
         // eslint-disable-next-line no-unused-vars
       } catch (error) {
-        Swal.fire('Error', 'Unauthorized action.', 'error');
+        Swal.fire('Error', 'Unauthorized or server error.', 'error');
       }
     }
   };
@@ -144,7 +83,7 @@ const VolunteerAllBloodDonationRequests = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12 px-4">
-      {/* Volunteer Dashboard Header */}
+      {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
@@ -152,31 +91,32 @@ const VolunteerAllBloodDonationRequests = () => {
               <Activity size={24} />
             </div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">
-              Requests Pool
+              Donation Pool
             </h1>
           </div>
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
               <ShieldCheck size={12} className="text-emerald-400" /> Volunteer
-              Mode
+              Access
             </span>
             <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em]">
-              Monitoring System Active
+              Monitoring All Requests
             </p>
           </div>
         </div>
 
-        {/* Pro Filter UI */}
-        <div className="bg-white p-2 rounded-[20px] shadow-xl shadow-slate-100 border border-slate-50 flex items-center group transition-all focus-within:ring-2 focus-within:ring-slate-100">
+        {/* Filter */}
+        <div className="bg-white p-2 rounded-[20px] shadow-xl shadow-slate-100 border border-slate-50 flex items-center group transition-all">
           <Filter size={18} className="text-slate-400 ml-3" />
           <select
             onChange={(e) => {
               setFilterStatus(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full lg:w-48 bg-transparent border-none outline-none font-black text-[10px] uppercase tracking-[0.2em] text-slate-700 cursor-pointer p-3 focus:ring-0"
+            value={filterStatus}
+            className="w-full lg:w-48 bg-transparent border-none outline-none font-black text-[10px] uppercase tracking-[0.2em] text-slate-700 cursor-pointer p-3"
           >
-            <option value="all">Display: All Requests</option>
+            <option value="all">Display: All Status</option>
             <option value="pending">Status: Pending</option>
             <option value="inprogress">Status: In Progress</option>
             <option value="done">Status: Done</option>
@@ -185,21 +125,32 @@ const VolunteerAllBloodDonationRequests = () => {
         </div>
       </div>
 
-      {/* Requests Table */}
+      {/* Table */}
       <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/40 border border-slate-50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] border-b border-slate-100">
-                <th className="px-8 py-8">Recipient & Location</th>
-                <th className="px-8 py-8 text-center">Group</th>
+                <th className="px-8 py-8">Recipient & Details</th>
+                <th className="px-8 py-8 text-center">Blood Group</th>
                 <th className="px-8 py-8">Live Status</th>
-                <th className="px-8 py-8">Donor Records</th>
-                <th className="px-8 py-8 text-right">Volunteer Action</th>
+                <th className="px-8 py-8">Donor Info</th>
+                <th className="px-8 py-8 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {paginatedData.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="px-8 py-24 text-center">
+                    <div className="flex flex-col items-center gap-4 animate-pulse">
+                      <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                      <p className="font-black text-slate-300 uppercase italic tracking-widest">
+                        Fetching Registry...
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedData.length > 0 ? (
                 paginatedData.map((req) => (
                   <tr
                     key={req._id}
@@ -211,7 +162,7 @@ const VolunteerAllBloodDonationRequests = () => {
                       </p>
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase mt-1">
                         <MapPin size={12} className="text-red-500" />{' '}
-                        {req.recipientDistrict}, {req.recipientUpazila}
+                        {req.district}, {req.hospitalName}
                       </div>
                     </td>
                     <td className="px-8 py-6 text-center">
@@ -225,7 +176,7 @@ const VolunteerAllBloodDonationRequests = () => {
                           req.status === 'pending'
                             ? 'bg-amber-50 text-amber-600 border-amber-100'
                             : req.status === 'inprogress'
-                              ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-50'
+                              ? 'bg-blue-600 text-white shadow-lg shadow-blue-50'
                               : req.status === 'done'
                                 ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                                 : 'bg-slate-100 text-slate-400 border-slate-200'
@@ -238,7 +189,7 @@ const VolunteerAllBloodDonationRequests = () => {
                       {req.donorEmail ? (
                         <div className="space-y-1">
                           <p className="text-[10px] font-black text-slate-800 uppercase leading-none">
-                            {req.donorName}
+                            {req.donorName || 'N/A'}
                           </p>
                           <p className="text-[9px] font-bold text-slate-400 italic">
                             {req.donorEmail}
@@ -252,14 +203,13 @@ const VolunteerAllBloodDonationRequests = () => {
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex justify-end items-center gap-3">
-                        {/* 🚫 ভলান্টিয়ারের অ্যাকশন লজিক: শুধুমাত্র ইন-প্রগ্রেস হলে আপডেট বাটন আসবে */}
                         {req.status === 'inprogress' ? (
                           <div className="flex gap-1.5 bg-slate-50 p-1 rounded-2xl border border-slate-100 shadow-inner">
                             <button
                               onClick={() =>
                                 handleStatusUpdate(req._id, 'done')
                               }
-                              className="px-4 py-2 bg-white text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm active:scale-95"
+                              className="px-4 py-2 bg-white text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm"
                             >
                               Done
                             </button>
@@ -267,7 +217,7 @@ const VolunteerAllBloodDonationRequests = () => {
                               onClick={() =>
                                 handleStatusUpdate(req._id, 'canceled')
                               }
-                              className="px-4 py-2 bg-white text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm active:scale-95"
+                              className="px-4 py-2 bg-white text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm"
                             >
                               Cancel
                             </button>
@@ -278,11 +228,9 @@ const VolunteerAllBloodDonationRequests = () => {
                             {req.status === 'pending' ? 'Locked' : 'Closed'}
                           </div>
                         )}
-
-                        {/* View Details Link */}
                         <Link
                           to={`/dashboard/donation-details/${req._id}`}
-                          className="p-3.5 bg-white text-slate-400 hover:text-red-600 rounded-[18px] transition-all border border-slate-100 hover:shadow-xl hover:-translate-y-0.5"
+                          className="p-3.5 bg-white text-slate-400 hover:text-red-600 rounded-[18px] transition-all border border-slate-100"
                         >
                           <Eye size={20} />
                         </Link>
@@ -293,9 +241,9 @@ const VolunteerAllBloodDonationRequests = () => {
               ) : (
                 <tr>
                   <td colSpan="5" className="px-8 py-24 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <Search size={40} className="text-slate-200" />
-                      <p className="font-black text-slate-300 uppercase tracking-[0.5em] italic">
+                    <div className="flex flex-col items-center gap-3 text-slate-300">
+                      <Search size={40} />
+                      <p className="font-black uppercase tracking-[0.5em] italic">
                         No Records Found
                       </p>
                     </div>
@@ -306,11 +254,11 @@ const VolunteerAllBloodDonationRequests = () => {
           </table>
         </div>
 
-        {/* Modern Pagination */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="p-10 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-slate-50">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
-              Global Registry Monitor
+              Volunteer Monitor
             </span>
             <div className="flex items-center gap-3">
               <button
