@@ -94,18 +94,18 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
   return (
     <form onSubmit={handleSubmit} className="mt-5">
       {['bkash', 'nagad', 'rocket', 'upay'].includes(selectedMethod) ? (
-        <div className="mb-4">
+        <div className="mb-4 ">
           <input
             type="text"
             required
             placeholder="Transaction ID (e.g. 8N7X6W5Q)"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-all font-mono text-sm uppercase text-center"
+            className="w-full px-4 py-3  bg-gray-50 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-all font-mono text-sm uppercase text-center"
             value={trxId}
             onChange={(e) => setTrxId(e.target.value)}
           />
         </div>
       ) : (
-        <div className="mb-4 p-3 border border-gray-200 rounded-xl bg-gray-50">
+        <div className="mb-4 p-3 border  border-gray-200 rounded-xl bg-gray-50">
           <CardElement
             options={{
               style: { base: { fontSize: '14px', color: '#424770' } },
@@ -117,7 +117,7 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
       <button
         type="submit"
         disabled={processing || !selectedMethod || amount < 10}
-        className="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-100 disabled:bg-gray-200 disabled:shadow-none text-sm tracking-wide uppercase"
+        className="w-full cursor-pointer bg-red-600 text-white  font-bold py-3.5 rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-100 disabled:bg-gray-200 disabled:shadow-none text-sm tracking-wide uppercase"
       >
         {processing ? 'Processing...' : `Confirm ৳${amount || 0}`}
       </button>
@@ -213,7 +213,7 @@ const FundingPage = () => {
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-red-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:bg-red-700 transition-all active:scale-95 uppercase tracking-tight"
+            className="bg-red-600 cursor-pointer text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:bg-red-700 transition-all active:scale-95 uppercase tracking-tight"
           >
             Donate Now
           </button>
@@ -350,7 +350,7 @@ const FundingPage = () => {
                 />
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-6 ">
                 <MethodGrid
                   title="Mobile Wallet"
                   icon={<Smartphone size={12} />}

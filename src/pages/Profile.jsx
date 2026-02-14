@@ -220,7 +220,7 @@ const Profile = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditable(true)}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-xl shadow-slate-200"
+                    className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-xl shadow-slate-200"
                   >
                     <Edit3 size={14} /> Edit Profile
                   </button>
@@ -228,14 +228,14 @@ const Profile = () => {
                   <div className="flex gap-3">
                     <button
                       type="submit"
-                      className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+                      className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
                     >
                       <Save size={14} /> {loading ? 'Saving...' : 'Save'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsEditable(false)}
-                      className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all"
+                      className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all"
                     >
                       <X size={14} /> Cancel
                     </button>

@@ -13,6 +13,7 @@ import {
   Tag,
   Search,
   BookOpen,
+  Upload,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import useAxiosSecure from '../../Hooks/useAxiosSecure';
@@ -101,43 +102,89 @@ const ContentManagement = () => {
     setLoading(true);
     const form = e.target;
 
-    const blogData = {
-      title: form.title.value,
-      image: form.image.value,
-      category: form.category.value,
-      content: form.content.value,
-      date: isEditing
-        ? currentBlog.date
-        : new Date().toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          }),
-      status: isEditing ? currentBlog.status : 'draft',
-    };
+    // ১. নিরাপদভাবে ফাইল ধরা
+    const imageFile = form.image?.files?.[0];
+    let imageUrl = isEditing ? currentBlog?.image : '';
 
     try {
+      // ২. ইমেজ আপলোড লজিক
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+
+        // নিরাপদভাবে এপিআই কি রিড করা
+        const envKey = import.meta.env.VITE_IMGBB_API_KEY;
+        const apiKey = envKey ? envKey.trim().replace(';', '') : '';
+
+        if (!apiKey) {
+          throw new Error(
+            'API Key missing. Check your .env file and restart server.'
+          );
+        }
+
+        const imgbb_url = `https://api.imgbb.com/1/upload?key=${apiKey}`;
+
+        const res = await fetch(imgbb_url, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const imgData = await res.json();
+
+        if (imgData.success) {
+          imageUrl = imgData.data.display_url;
+        } else {
+          // ImgBB থেকে আসা সুনির্দিষ্ট এরর মেসেজ দেখালে সুবিধা হবে
+          throw new Error(imgData.error?.message || 'Image upload failed');
+        }
+      }
+
+      // ৩. ডাটা অবজেক্ট তৈরি
+      const blogData = {
+        title: form.title.value,
+        image: imageUrl,
+        category: form.category.value,
+        content: form.content.value,
+        date: isEditing
+          ? currentBlog.date
+          : new Date().toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            }),
+        status: isEditing ? currentBlog.status : 'draft',
+      };
+
+      // ৪. সার্ভারে ডাটা পাঠানো
+      let response;
       if (isEditing) {
-        const res = await axiosSecure.patch(
+        response = await axiosSecure.patch(
           `/blogs/${currentBlog._id}`,
           blogData
         );
-        if (res.data.modifiedCount > 0) {
+        if (response.data.modifiedCount > 0) {
           Swal.fire('Updated!', 'Blog post refreshed.', 'success');
         }
       } else {
-        const res = await axiosSecure.post('/blogs', blogData);
-        if (res.data.insertedId) {
+        response = await axiosSecure.post('/blogs', blogData);
+        if (response.data.insertedId) {
           Swal.fire('Saved!', 'New post added to drafts.', 'success');
         }
       }
+
+      // ৫. সাকসেস হলে সব স্টেট রিসেট
       setShowModal(false);
       setIsEditing(false);
       setCurrentBlog(null);
+      form.reset(); // ফর্ম রিসেট করা জরুরি
       fetchBlogs();
     } catch (error) {
       console.error('Submit Error:', error);
-      Swal.fire('Error', 'Action failed', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Action Failed',
+        text: error.message || 'Something went wrong',
+      });
     } finally {
       setLoading(false);
     }
@@ -165,7 +212,7 @@ const ContentManagement = () => {
           }}
           className="group relative flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-red-600 transition-all duration-500 shadow-2xl active:scale-95 overflow-hidden"
         >
-          <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+          <div className="absolute cursor-pointer inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
           <Plus size={18} /> Create New Post
         </button>
       </div>
@@ -282,7 +329,7 @@ const ContentManagement = () => {
                               onClick={() =>
                                 handleStatusChange(blog._id, 'published')
                               }
-                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-400 border border-slate-100 hover:border-green-500 hover:text-green-600 transition-all duration-300 shadow-sm"
+                              className="flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider bg-white text-slate-400 border border-slate-100 hover:border-green-500 hover:text-green-600 transition-all duration-300 shadow-sm"
                             >
                               <CheckCircle size={14} /> Publish
                             </button>
@@ -324,13 +371,13 @@ const ContentManagement = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEditClick(blog)}
-                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
+                          className="w-10 h-10 cursor-pointer flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
                         >
                           <Edit3 size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(blog._id)}
-                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                          className="w-10 h-10 flex items-center cursor-pointer justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -353,7 +400,7 @@ const ContentManagement = () => {
                 setShowModal(false);
                 setIsEditing(false);
               }}
-              className="absolute top-12 right-12 w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-red-600 hover:text-white transition-all"
+              className="absolute cursor-pointer top-12 right-12 w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-red-600 hover:text-white transition-all"
             >
               <X size={24} />
             </button>
@@ -400,25 +447,29 @@ const ContentManagement = () => {
                   </select>
                 </div>
               </div>
-
-              <div className="space-y-3">
+              {/***********************************************************************************************/}
+              <div className="space-y-3 ">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">
-                  Cover Image URL
+                  Upload Cover Image
                 </label>
                 <div className="relative group">
-                  <ImageIcon
+                  <Upload
                     size={20}
                     className="absolute left-8 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-red-500 transition-colors"
                   />
                   <input
                     name="image"
-                    defaultValue={isEditing ? currentBlog?.image : ''}
-                    type="url"
-                    placeholder="https://unsplash.com/your-image"
-                    className="w-full bg-slate-50 border-2 border-transparent rounded-[1.5rem] pl-16 pr-8 py-5 font-bold text-slate-800 outline-none focus:border-red-500/20 focus:bg-white transition-all"
-                    required
+                    type="file"
+                    accept="image/*"
+                    className="w-full cursor-pointer bg-slate-50 border-2 border-dashed border-slate-200 rounded-[1.5rem] pl-16 pr-8 py-5 font-bold text-slate-500 outline-none focus:border-red-500/20 focus:bg-white transition-all file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-red-50 file:text-red-600 hover:file:bg-red-100 cursor:pointer"
+                    required={!isEditing}
                   />
                 </div>
+                {isEditing && currentBlog?.image && (
+                  <p className="text-[9px] text-slate-400 ml-2 italic">
+                    Current: {currentBlog.image.substring(0, 30)}...
+                  </p>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -437,7 +488,7 @@ const ContentManagement = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 text-white py-7 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:bg-red-600 transition-all duration-500 flex items-center justify-center gap-4 active:scale-95 disabled:bg-slate-300"
+                className="w-full cursor-pointer bg-slate-900 text-white py-7 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:bg-red-600 transition-all duration-500 flex items-center justify-center gap-4 active:scale-95 disabled:bg-slate-300"
               >
                 {loading ? (
                   <Loader2 className="animate-spin" size={24} />

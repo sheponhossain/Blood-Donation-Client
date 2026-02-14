@@ -159,7 +159,7 @@ const AdminDashboardHome = () => {
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`flex-1 lg:flex-none px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${period === p ? 'bg-white text-red-600 shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 lg:flex-none px-6 py-2.5 cursor-pointer rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${period === p ? 'bg-white text-red-600 shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 {p}
               </button>

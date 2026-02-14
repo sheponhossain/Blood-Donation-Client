@@ -43,7 +43,7 @@ const Funding = () => {
         </div>
 
         <Link
-          to="/dashboard/payment"
+          to="/funding"
           className="btn bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-xl px-8 flex items-center gap-2 shadow-lg shadow-emerald-100 transition-all"
         >
           <Plus size={18} /> Give Funding

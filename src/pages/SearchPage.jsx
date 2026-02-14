@@ -157,10 +157,10 @@ const SearchPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl hover:bg-red-600 shadow-lg shadow-slate-200 hover:shadow-red-200 transition-all duration-300 flex items-center justify-center gap-2 tracking-widest"
+              className="w-full bg-slate-900 cursor-pointer text-white font-black py-4 rounded-2xl hover:bg-red-600 shadow-lg shadow-slate-200 hover:shadow-red-200 transition-all duration-300 flex items-center justify-center gap-2 tracking-widest"
             >
               {isLoading ? (
-                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                <div className="animate-spin  h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
               ) : (
                 <>
                   <Search size={18} /> SEARCH

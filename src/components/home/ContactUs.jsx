@@ -119,7 +119,7 @@ const ContactUs = () => {
               <div className="md:col-span-2 pt-4">
                 <button
                   type="submit"
-                  className="group w-full md:w-auto px-12 py-5 bg-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3"
+                  className="group w-full cursor-pointer md:w-auto px-12 py-5 bg-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3"
                 >
                   Submit Message{' '}
                   <ArrowRight

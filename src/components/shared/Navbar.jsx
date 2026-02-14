@@ -70,7 +70,7 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 bg-gray-50 p-1.5 pr-4 rounded-full border border-gray-200 hover:border-red-200 transition-all shadow-sm"
+                  className="flex items-center gap-2 bg-gray-50 p-1.5 pr-4 cursor-pointer rounded-full border border-gray-200 hover:border-red-200 transition-all shadow-sm"
                 >
                   <img
                     src={
@@ -89,8 +89,8 @@ const Navbar = () => {
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-3 w-52 bg-white border border-gray-100 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in duration-200">
-                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                  <div className="absolute  right-0 mt-3 w-52 bg-white border border-gray-100 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in duration-200">
+                    <div className="px-4 py-3  border-b border-gray-50 mb-1">
                       <p className="text-xs text-gray-400 uppercase tracking-wider font-bold">
                         Account
                       </p>
@@ -107,7 +107,7 @@ const Navbar = () => {
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 font-semibold transition-colors"
+                      className="w-full flex cursor-pointer items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 font-semibold transition-colors"
                     >
                       <LogOut className="w-4 h-4" /> Logout
                     </button>

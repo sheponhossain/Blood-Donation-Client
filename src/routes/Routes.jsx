@@ -25,12 +25,14 @@ import BloodRequests from '../pages/BloodRequests';
 import BloodDetails from '../pages/BloodDetails';
 import PrivateRoute from './PrivateRoute';
 import Blog from '../pages/Blog';
+import NotFound from '../components/shared/NotFound';
+import BlogDetails from '../pages/BlogDetails';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
-    errorElement: <ErrorPage />,
+    errorElement: <NotFound />,
     children: [
       {
         path: '/',
@@ -67,6 +69,10 @@ export const router = createBrowserRouter([
       {
         path: 'blog',
         element: <Blog />,
+      },
+      {
+        path: '/blog/:id',
+        element: <BlogDetails />,
       },
       {
         path: 'funding',
