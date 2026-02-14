@@ -44,7 +44,10 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
     const cardMethods = ['visa', 'mastercard', 'dbbl', 'ibbl'];
     if (amount >= 10 && cardMethods.includes(selectedMethod)) {
       axios
-        .post('http://localhost:5000/create-payment-intent', { price: amount })
+        .post(
+          'https://blood-donation-server-snowy-six.vercel.app/create-payment-intent',
+          { price: amount }
+        )
         .then((res) => setClientSecret(res.data.clientSecret))
         .catch((err) => console.error(err));
     }
@@ -148,7 +151,7 @@ const FundingPage = () => {
 
   const fetchFundings = () =>
     axios
-      .get('http://localhost:5000/payments')
+      .get('https://blood-donation-server-snowy-six.vercel.app/payments')
       .then((res) => setFundings(res.data));
   useEffect(() => {
     fetchFundings();
@@ -167,7 +170,7 @@ const FundingPage = () => {
     };
     try {
       const res = await axios.post(
-        'http://localhost:5000/payments',
+        'https://blood-donation-server-snowy-six.vercel.app/payments',
         paymentData
       );
       if (res.data.insertedId) {

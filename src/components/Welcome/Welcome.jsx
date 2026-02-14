@@ -16,7 +16,9 @@ const Welcome = ({
   useEffect(() => {
     if (authUser?.email) {
       axios
-        .get(`http://localhost:5000/user/${authUser.email}`)
+        .get(
+          `https://blood-donation-server-snowy-six.vercel.app/user/${authUser.email}`
+        )
         .then((res) => {
           setDbUser(res.data);
         })

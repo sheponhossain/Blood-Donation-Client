@@ -39,7 +39,9 @@ const Profile = () => {
     if (authUser?.email) {
       setLoading(true);
       axios
-        .get(`http://localhost:5000/user/${authUser.email}`)
+        .get(
+          `https://blood-donation-server-snowy-six.vercel.app/user/${authUser.email}`
+        )
         .then((res) => {
           const data = res.data;
           setUser({
@@ -121,7 +123,7 @@ const Profile = () => {
       };
 
       const response = await axios.patch(
-        `http://localhost:5000/user-update/${user.email}`,
+        `https://blood-donation-server-snowy-six.vercel.app/user-update/${user.email}`,
         updateData
       );
 

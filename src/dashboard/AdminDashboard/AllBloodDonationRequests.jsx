@@ -27,11 +27,14 @@ const AllBloodDonationRequests = () => {
   const fetchAllRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/donation-requests', {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem('access-token')}`,
-        },
-      });
+      const response = await fetch(
+        'https://blood-donation-server-snowy-six.vercel.app/donation-requests',
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem('access-token')}`,
+          },
+        }
+      );
       const data = await response.json();
       setAllRequests(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -48,7 +51,7 @@ const AllBloodDonationRequests = () => {
   const handleStatusUpdate = async (id, newStatus) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/donation-request/${id}`,
+        `https://blood-donation-server-snowy-six.vercel.app/donation-request/${id}`,
         {
           method: 'PATCH',
           headers: {
@@ -81,7 +84,7 @@ const AllBloodDonationRequests = () => {
       if (result.isConfirmed) {
         try {
           const response = await fetch(
-            `http://localhost:5000/donation-request/${id}`,
+            `https://blood-donation-server-snowy-six.vercel.app/donation-request/${id}`,
             {
               method: 'DELETE',
               headers: {

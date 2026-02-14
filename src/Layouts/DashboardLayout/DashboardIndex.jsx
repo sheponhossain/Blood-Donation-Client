@@ -11,7 +11,9 @@ const DashboardIndex = () => {
 
   useEffect(() => {
     if (user?.email) {
-      fetch(`http://localhost:5000/user/${user.email}`)
+      fetch(
+        `https://blood-donation-server-snowy-six.vercel.app/user/${user.email}`
+      )
         .then((res) => res.json())
         .then((data) => {
           setDbUser(data);

@@ -26,13 +26,16 @@ const AllUsers = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/users', {
-        method: 'GET',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        'https://blood-donation-server-snowy-six.vercel.app/users',
+        {
+          method: 'GET',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.status === 403) {
         console.error('Forbidden: Check if you are an admin in DB');
@@ -53,14 +56,17 @@ const AllUsers = () => {
 
   const handleUpdate = async (id, updatedField) => {
     try {
-      const response = await fetch(`http://localhost:5000/users/update/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${localStorage.getItem('access-token')}`,
-        },
-        body: JSON.stringify(updatedField),
-      });
+      const response = await fetch(
+        `https://blood-donation-server-snowy-six.vercel.app/users/update/${id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('access-token')}`,
+          },
+          body: JSON.stringify(updatedField),
+        }
+      );
       const data = await response.json();
 
       if (data.modifiedCount > 0) {

@@ -24,7 +24,9 @@ const DonorDashboardHome = () => {
 
   useEffect(() => {
     if (authUser?.email) {
-      fetch(`http://localhost:5000/my-donation-requests/${authUser.email}`)
+      fetch(
+        `https://blood-donation-server-snowy-six.vercel.app/my-donation-requests/${authUser.email}`
+      )
         .then((res) => res.json())
         .then((data) => {
           setRequests(data);
@@ -35,11 +37,14 @@ const DonorDashboardHome = () => {
   }, [authUser]);
 
   const handleStatusChange = (id, newStatus) => {
-    fetch(`http://localhost:5000/donation-request/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    })
+    fetch(
+      `https://blood-donation-server-snowy-six.vercel.app/donation-request/${id}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data.modifiedCount > 0) {
@@ -69,12 +74,15 @@ const DonorDashboardHome = () => {
       confirmButtonText: 'Yes, delete it!',
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`http://localhost:5000/donation-request/${id}`, {
-          method: 'DELETE',
-          headers: {
-            authorization: `Bearer ${localStorage.getItem('access-token')}`, // টোকেন থাকলে
-          },
-        })
+        fetch(
+          `https://blood-donation-server-snowy-six.vercel.app/donation-request/${id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              authorization: `Bearer ${localStorage.getItem('access-token')}`, // টোকেন থাকলে
+            },
+          }
+        )
           .then((res) => res.json())
           .then((data) => {
             if (data.deletedCount > 0) {

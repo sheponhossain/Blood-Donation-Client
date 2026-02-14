@@ -9,11 +9,14 @@ const Funding = () => {
   const fetchFundings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/payments', {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem('access-token')}`,
-        },
-      });
+      const response = await fetch(
+        'https://blood-donation-server-snowy-six.vercel.app/payments',
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem('access-token')}`,
+          },
+        }
+      );
       const data = await response.json();
       setFundings(Array.isArray(data) ? data : []);
     } catch (error) {

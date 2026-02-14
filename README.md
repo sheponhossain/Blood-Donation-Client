@@ -1,16 +1,74 @@
-# React + Vite
+# 🩸 Blood Donation Management System (MERN)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive and user-friendly platform designed to connect blood donors with recipients. This application facilitates blood donation activities, donor management, and organizational funding with role-based access control.
 
-Currently, two official plugins are available:
+## 🌐 Live Site
+**Live URL:** [Insert Your Live Link Here]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 📖 Table of Contents
+* [Objective](#-objective)
+* [Key Features](#-key-features)
+* [User Roles & Permissions](#-user-roles--permissions)
+* [Tech Stack](#-tech-stack)
+* [Packages Used](#-packages-used)
+* [Installation & Setup](#-installation--setup)
+* [Credentials](#-credentials)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🎯 Objective
+The Blood Donation Application aims to create a seamless experience for finding donors during emergencies. It ensures efficient donor management, secure donation requests, and a transparent funding system.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🚀 Key Features
+
+- **Dynamic Search:** Public search page to find donors by blood group, district, and upazila.
+- **Role-Based Dashboards:** Specific layouts and features for **Donors**, **Volunteers**, and **Admins**.
+- **Donation Management:** Create, update, and track blood donation requests (Pending, Inprogress, Done, Canceled).
+- **Secure Authentication:** Firebase-powered login/registration with JWT (JSON Web Token) for private API protection.
+- **Funding & Payments:** Integrated **Stripe** payment gateway for users to contribute funds.
+- **Data Visualization:** Admin and Volunteer dashboards feature charts (Recharts) for statistical data.
+- **PDF Generation:** Search results and reports can be downloaded as PDF.
+- **Profile Management:** Users can update their personal information including blood group and location.
+
+---
+
+## 👥 User Roles & Permissions
+
+- **Donor 🩸:** Register, search donors, create donation requests, and manage personal requests.
+- **Volunteer 🤝:** View all donation requests, update donation statuses, and access dashboard statistics.
+- **Admin 🌐:** Full control over users (Block/Unblock), role management (make Volunteer/Admin), and global donation request oversight.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React.js (Vite), Tailwind CSS, DaisyUI.
+- **Backend:** Node.js, Express.js.
+- **Database:** MongoDB.
+- **Authentication:** Firebase Auth & JWT.
+
+---
+
+## 📦 Packages Used
+
+### **Client-Side Dependencies:**
+* **Navigation:** `react-router`
+* **Form Handling:** `react-hook-form`, `react-datepicker`
+* **Data Fetching:** `@tanstack/react-query`, `axios`
+* **Payment:** `@stripe/react-stripe-js`, `@stripe/stripe-js`
+* **State Management:** `react-is`
+* **Icons & UI:** `lucide-react`, `react-icons`, `sweetalert2`, `daisyui`
+* **Charts & PDF:** `recharts`, `jspdf`, `html2pdf.js`, `html2canvas`
+* **Animations:** `lottie-react`, `@dotlottie/react-player`
+
+---
+
+## ⚙️ Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone [your-client-repo-link]

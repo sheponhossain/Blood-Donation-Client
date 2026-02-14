@@ -33,7 +33,7 @@ const AdminDashboardHome = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:5000/admin-stats')
+    fetch('https://blood-donation-server-snowy-six.vercel.app/admin-stats')
       .then((res) => res.json())
       .then((data) => setDbStats(data))
       .catch((err) => console.error('Stats fetch error:', err));

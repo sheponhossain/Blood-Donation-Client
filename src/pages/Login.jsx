@@ -24,7 +24,7 @@ const Login = () => {
         const user = result.user;
         const userInfo = { email: user.email };
 
-        fetch('http://localhost:5000/jwt', {
+        fetch('https://blood-donation-server-snowy-six.vercel.app/jwt', {
           method: 'POST',
           headers: {
             'content-type': 'application/json',
