@@ -100,10 +100,10 @@ const AdminDashboardHome = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-1000 pb-10">
-      {/* 1. Header with Glassmorphism Effect */}
+      {/* Header with Glassmorphism Effect */}
       <Welcome />
 
-      {/* 2. Enhanced Stats Cards */}
+      {/*  Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat) => (
           <div
@@ -139,7 +139,7 @@ const AdminDashboardHome = () => {
         ))}
       </div>
 
-      {/* 3. Main Chart Section - Clean & Informative */}
+      {/*  Main Chart Section - Clean & Informative */}
       <div className="bg-white p-8 md:p-10 rounded-[40px] shadow-sm border border-slate-100">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
           <div className="space-y-1">
@@ -245,7 +245,7 @@ const AdminDashboardHome = () => {
         </div>
       </div>
 
-      {/* 4. Interactive Quick Actions */}
+      {/* Interactive Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Link
           to="/dashboard/all-users"

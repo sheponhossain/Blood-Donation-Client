@@ -9,6 +9,8 @@ import {
   MapPin,
   Clock,
   Calendar,
+  User,
+  Mail,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import Swal from 'sweetalert2';
@@ -21,7 +23,7 @@ const MyDonationRequests = () => {
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState('all'); // ডিফল্ট ফিল্টার
+  const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 6;
@@ -71,7 +73,6 @@ const MyDonationRequests = () => {
     });
   };
 
-  // ২. ফিল্টারিং লজিক (নতুনভাবে হ্যান্ডেল করা হয়েছে)
   const filteredData = useMemo(() => {
     return filterStatus === 'all'
       ? requests
@@ -97,13 +98,11 @@ const MyDonationRequests = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700 pb-10">
-      {/* Header & Filter Section */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-[30px] border border-slate-100 shadow-sm">
         <h2 className="text-xl font-black text-slate-800 uppercase italic tracking-tight">
           My <span className="text-red-600">Donation</span> Requests
         </h2>
 
-        {/* --- ফিল্টার ড্রপডাউন --- */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-widest">
             <Filter size={14} /> Filter:
@@ -112,7 +111,7 @@ const MyDonationRequests = () => {
             value={filterStatus}
             onChange={(e) => {
               setFilterStatus(e.target.value);
-              setCurrentPage(1); // ফিল্টার চেঞ্জ হলে ১ম পেজে নিয়ে আসবে
+              setCurrentPage(1);
             }}
             className="bg-slate-50 border-none px-4 py-2 rounded-xl font-bold text-xs text-slate-700 focus:ring-2 focus:ring-red-500 outline-none transition-all cursor-pointer"
           >
@@ -125,7 +124,6 @@ const MyDonationRequests = () => {
         </div>
       </div>
 
-      {/* Table Section */}
       <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -142,72 +140,91 @@ const MyDonationRequests = () => {
             <tbody className="divide-y divide-slate-50">
               {paginatedData.length > 0 ? (
                 paginatedData.map((req) => (
-                  <tr
-                    key={req._id}
-                    className="hover:bg-slate-50/50 transition-all group"
-                  >
-                    <td className="px-8 py-6 font-black text-slate-800">
-                      {req.recipientName}
-                    </td>
-                    <td className="px-8 py-6 text-slate-500 font-bold text-xs italic">
-                      <div className="flex items-center gap-1 text-[10px]">
-                        <MapPin size={12} className="text-red-500" />{' '}
-                        {req.district}, {req.division}
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="text-[10px] font-black text-slate-700 flex flex-col uppercase">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={12} /> {req.donationDate}
+                  <React.Fragment key={req._id}>
+                    <tr
+                      className={`group transition-all ${req.status === 'inprogress' ? 'bg-blue-50/20' : 'hover:bg-slate-50/50'}`}
+                    >
+                      <td className="px-8 py-6 font-black text-slate-800">
+                        {req.recipientName}
+                      </td>
+                      <td className="px-8 py-6 text-slate-500 font-bold text-xs italic">
+                        <div className="flex items-center gap-1 text-[10px]">
+                          <MapPin size={12} className="text-red-500" />{' '}
+                          {req.district}, {req.division}
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="text-[10px] font-black text-slate-700 flex flex-col uppercase">
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} /> {req.donationDate}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={12} /> {req.donationTime}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 text-center">
+                        <span className="px-3 py-1 bg-red-600 text-white rounded-lg font-black text-xs">
+                          {req.bloodGroup}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} /> {req.donationTime}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6 text-center">
-                      <span className="px-3 py-1 bg-red-600 text-white rounded-lg font-black text-xs">
-                        {req.bloodGroup}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span
-                        className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                          req.status === 'pending'
-                            ? 'bg-amber-50 text-amber-600 border-amber-100'
-                            : req.status === 'inprogress'
-                              ? 'bg-blue-50 text-blue-600 border-blue-100'
-                              : req.status === 'done'
-                                ? 'bg-green-50 text-green-600 border-green-100'
-                                : 'bg-slate-50 text-slate-500 border-slate-100'
-                        }`}
-                      >
-                        {req.status}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Link
-                          to={`/dashboard/edit-donation-request/${req._id}`}
-                          className="p-2 text-slate-400 hover:text-amber-500 transition-colors"
-                        >
-                          <Edit2 size={16} />
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(req._id)}
-                          className="p-2 text-slate-400 hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                        <Link
-                          to={`/dashboard/donation-details/${req._id}`}
-                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                        >
-                          <Eye size={16} />
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-10 py-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <span
+                            className={`px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-sm border ${
+                              req.status === 'pending'
+                                ? 'bg-amber-50 text-amber-600 border-amber-100'
+                                : req.status === 'inprogress'
+                                  ? 'bg-blue-600 text-white border-blue-600 shadow-blue-100'
+                                  : req.status === 'done'
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                    : 'bg-slate-100 text-slate-500 border-slate-200'
+                            }`}
+                          >
+                            {req.status}
+                          </span>
+                          {req.status === 'inprogress' && req.donorName && (
+                            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-start bg-blue-50/50 p-3 rounded-2xl border border-blue-100 mt-1 min-w-[150px]">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <User size={12} className="text-blue-600" />
+                                <span className="text-[11px] font-black text-slate-800">
+                                  {req.donorName}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <Mail size={10} className="text-blue-400" />
+                                <span className="text-[9px] font-bold text-blue-500 italic lowercase">
+                                  {req.donorEmail}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                        <div className="flex justify-end gap-1">
+                          <Link
+                            to={`/dashboard/edit-donation-request/${req._id}`}
+                            className="p-2 text-slate-400 hover:text-amber-500 transition-colors"
+                          >
+                            <Edit2 size={16} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(req._id)}
+                            className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <Link
+                            to={`/dashboard/donation-details/${req._id}`}
+                            className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                          >
+                            <Eye size={16} />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  </React.Fragment>
                 ))
               ) : (
                 <tr>
@@ -224,7 +241,6 @@ const MyDonationRequests = () => {
           </table>
         </div>
 
-        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="bg-slate-50/50 px-8 py-6 flex items-center justify-between border-t border-slate-100">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">

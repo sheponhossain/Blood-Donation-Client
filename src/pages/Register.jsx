@@ -58,7 +58,6 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // ১. ইমেজ আপলোড লজিক (যা আপনার ছিল)
       const imageFile = data.avatar[0];
       const formData = new FormData();
       formData.append('image', imageFile);
@@ -71,11 +70,9 @@ const Register = () => {
       if (imgRes.data.success) {
         const photoURL = imgRes.data.data.display_url;
 
-        // ২. Firebase-এ ইউজার তৈরি করা
         await createUser(data.email, data.password);
         await updateUserProfile(data.name, photoURL);
 
-        // ৩. আপনার ডাটাবেসের জন্য অবজেক্ট তৈরি করা (সার্ভারে যা পাঠাবেন)
         const newUser = {
           name: data.name,
           email: data.email,
@@ -91,9 +88,6 @@ const Register = () => {
           status: 'active',
           role: 'donor',
         };
-
-        // ৪. Axios দিয়ে আপনার নিজের সার্ভারে ডেটা পাঠানো
-        // নিশ্চিত করুন আপনার ব্যাকেন্ড পোট ৫০icon০০ তে চলছে
         const serverRes = await axios.post(
           'http://localhost:5000/register',
           newUser

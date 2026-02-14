@@ -23,6 +23,8 @@ import DonationDetails from '../dashboard/DonorDashboard/DonationDetails';
 import VolunteerAllBloodDonationRequests from '../dashboard/volunteer/VolunteerAllBloodDonationRequests';
 import BloodRequests from '../pages/BloodRequests';
 import BloodDetails from '../pages/BloodDetails';
+import PrivateRoute from './PrivateRoute';
+import Blog from '../pages/Blog';
 
 export const router = createBrowserRouter([
   {
@@ -34,20 +36,24 @@ export const router = createBrowserRouter([
         path: '/',
         element: <Home />,
       },
+      // {
+      //   path: 'donation-requests',
+      //   element: <DonationRequest />,
+      // },
       {
-        path: 'donation-requests', // Nuton Route
-        element: <DonationRequest />,
-      },
-      {
-        path: 'Blood-requests', // Nuton Route
+        path: 'Blood-requests',
         element: <BloodRequests />,
       },
       {
-        path: 'blood-details/:id', // Nuton Route
-        element: <BloodDetails />,
+        path: 'blood-details/:id',
+        element: (
+          <PrivateRoute>
+            <BloodDetails />,
+          </PrivateRoute>
+        ),
       },
       {
-        path: 'Features', // Nuton Route
+        path: 'Features',
         element: <Features />,
       },
       {
@@ -59,8 +65,16 @@ export const router = createBrowserRouter([
         element: <Banner />,
       },
       {
+        path: 'blog',
+        element: <Blog />,
+      },
+      {
         path: 'funding',
-        element: <FundingPage />,
+        element: (
+          <PrivateRoute>
+            <FundingPage />,
+          </PrivateRoute>
+        ),
       },
     ],
   },
@@ -72,7 +86,7 @@ export const router = createBrowserRouter([
     path: 'register',
     element: <Register />,
   },
-  // Dashboard Routes (Private🔒)
+
   {
     path: 'dashboard',
     element: <DashboardLayout />,
@@ -125,8 +139,6 @@ export const router = createBrowserRouter([
           //   </PrivateRoute>
         ),
       },
-
-      // Admin/Volunteer routes pore add hobe
     ],
   },
 ]);

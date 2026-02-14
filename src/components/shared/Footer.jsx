@@ -15,7 +15,6 @@ const Footer = () => {
     <footer className="bg-gray-900 text-gray-300 mt-20 border-t border-gray-800">
       <div className="w-full mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Column 1: Brand & About */}
           <div className="flex flex-col items-start space-y-5">
             <h2 className="text-3xl font-bold text-white flex items-center gap-2 tracking-tight">
               <span className="text-red-600 drop-shadow-md">
@@ -49,13 +48,9 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 2: Quick Links - Fixed Alignment */}
           <div className="flex flex-col items-start lg:items-center">
             {' '}
-            {/* Container centered on Large, items start at same point */}
             <div className="text-left">
-              {' '}
-              {/* Inner container to keep text and underline together */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-white uppercase tracking-wider text-sm">
                   Quick Links
@@ -99,7 +94,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 3: Contact Us - Fixed Alignment */}
+          {/*  Contact Us - Fixed Alignment */}
           <div className="flex flex-col items-start lg:items-center">
             <div className="text-left">
               <div className="mb-6">
@@ -118,7 +113,7 @@ const Footer = () => {
                 <li className="flex items-start gap-4">
                   <FaEnvelope className="text-red-600 mt-1 shrink-0" />
                   <span className="hover:text-white transition-colors cursor-pointer">
-                    support@lifeflow.com
+                    support@BloodDonation.com
                   </span>
                 </li>
                 <li className="flex items-start gap-4">
@@ -131,7 +126,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 4: Newsletter */}
+          {/*  Newsletter */}
           <div className="flex flex-col items-start lg:items-center">
             <div className="text-left w-full max-w-[260px]">
               <div className="mb-6">
@@ -159,7 +154,9 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[13px] text-gray-500">
-          <p>© {new Date().getFullYear()} LifeFlow. All Rights Reserved.</p>
+          <p>
+            © {new Date().getFullYear()} BloodDonation. All Rights Reserved.
+          </p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-gray-300 transition-colors">
               Privacy Policy

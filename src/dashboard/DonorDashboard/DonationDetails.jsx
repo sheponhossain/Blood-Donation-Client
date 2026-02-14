@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'; // useContext add kora hoyeche
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import {
   MapPin,
@@ -14,19 +14,19 @@ import {
   Info,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import useAxiosSecure from '../../Hooks/useAxiosSecure'; // Path check korun
-import { AuthContext } from '../../providers/AuthProvider'; // Path check korun
+import useAxiosSecure from '../../Hooks/useAxiosSecure';
+import { AuthContext } from '../../providers/AuthProvider';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const DonationDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const axiosSecure = useAxiosSecure();
-  const { user: loggedInUser } = useContext(AuthContext); // Real logged in user context theke nilam
+  const { user: loggedInUser } = useContext(AuthContext);
 
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ১. ডাটাবেস থেকে স্পেসিফিক রিকোয়েস্ট আনা
   useEffect(() => {
     const fetchRequestDetails = async () => {
       try {
@@ -44,14 +44,13 @@ const DonationDetails = () => {
     if (id) fetchRequestDetails();
   }, [id, axiosSecure]);
 
-  // ২. ডোনেশন কনফার্ম করার লজিক (Status 'inprogress' kora)
   const handleConfirmDonation = async (e) => {
     e.preventDefault();
 
     const donationInfo = {
       donorName: loggedInUser?.displayName || loggedInUser?.name,
       donorEmail: loggedInUser?.email,
-      status: 'inprogress', // ডোনার কনফার্ম করলে স্ট্যাটাস ইন-প্রগ্রেস হবে
+      status: 'inprogress',
     };
 
     try {
@@ -59,6 +58,7 @@ const DonationDetails = () => {
         `/donation-request/${id}`,
         donationInfo
       );
+      console.log('Sending to DB:', donationInfo);
 
       if (res.data) {
         Swal.fire({
@@ -69,7 +69,6 @@ const DonationDetails = () => {
           customClass: { popup: 'rounded-[30px]' },
         });
 
-        // UI আপডেট করার জন্য লোকাল স্টেট আপডেট
         setRequest({ ...request, ...donationInfo });
         document.getElementById('donate_modal').close();
       }
@@ -117,70 +116,112 @@ const DonationDetails = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="bg-slate-50 px-8 py-10 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-6">
-              <div className="space-y-3">
-                <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  Recipient
-                </span>
-                <h2 className="text-4xl font-black text-slate-800 tracking-tight">
-                  {request.recipientName}
-                </h2>
-                <div className="flex items-center gap-2 text-slate-500 font-medium">
-                  <MapPin size={18} className="text-red-500" />
-                  <span>
-                    {request.district || request.recipientUpazila},{' '}
-                    {request.division || request.recipientDistrict}
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center bg-white px-8 py-6 rounded-3xl border border-slate-200 shadow-sm min-w-[140px]">
-                <Droplet
-                  className="text-red-600 mb-1"
-                  size={32}
-                  fill="currentColor"
+          <div className="group relative bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-500 hover:shadow-[0_30px_60px_rgba(220,38,38,0.1)]">
+            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none group-hover:opacity-60 group-hover:scale-100 transition-all duration-1000">
+              <div className="w-[500px] h-[500px]">
+                <DotLottieReact
+                  src="https://lottie.host/c1d7551d-5d0c-4241-89fa-4b4ebac272af/kJNh0U2yoH.lottie"
+                  loop
+                  autoplay
                 />
-                <span className="text-3xl font-black text-slate-900 leading-none">
-                  {request.bloodGroup}
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase mt-2 tracking-widest">
-                  Group
-                </span>
               </div>
             </div>
 
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
-                  <Hospital size={24} />
+            {/* Top Accent Line */}
+            <div className="relative z-20 h-2 w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-400"></div>
+
+            <div className="relative z-10 px-8 py-10">
+              {/* Main Content Layout */}
+              <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                {/* Left: Recipient Info */}
+                <div className="flex-1 space-y-4 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                    </span>
+                    <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">
+                      Urgent Request
+                    </span>
+                  </div>
+
+                  <h2 className="text-5xl font-black text-slate-800 tracking-tighter leading-none">
+                    {request.recipientName}
+                  </h2>
+
+                  <div className="flex items-center justify-center md:justify-start gap-2 text-slate-500 font-bold">
+                    <MapPin size={18} className="text-red-600" />
+                    <span>
+                      {request.district}, {request.division}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Hospital Name
-                  </p>
-                  <p className="text-slate-800 font-bold text-lg leading-tight">
-                    {request.hospitalName}
-                  </p>
-                  <p className="text-sm text-slate-500 mt-1">
-                    {request.fullAddress}
-                  </p>
+
+                {/* Right: Blood Group Card */}
+                <div className="flex-1 flex justify-center md:justify-end">
+                  <div className="bg-white p-2 rounded-[2rem] shadow-xl shadow-slate-200 border border-slate-50 group-hover:rotate-2 transition-transform duration-500">
+                    <div className="bg-slate-50 px-10 py-8 rounded-[1.8rem] flex flex-col items-center justify-center min-w-[150px] border border-white">
+                      <Droplet
+                        className="text-red-600 mb-2 animate-bounce"
+                        size={40}
+                        fill="currentColor"
+                      />
+                      <span className="text-5xl font-black text-slate-900 leading-none tracking-tighter">
+                        {request.bloodGroup}
+                      </span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase mt-3 tracking-widest">
+                        Blood Group
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
-                  <Calendar size={24} />
+              {/* Modern Divider */}
+              <div className="my-10 h-px bg-gradient-to-r from-transparent via-slate-100 to-transparent"></div>
+
+              {/* Bottom Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Hospital */}
+                <div className="p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-xl transition-all duration-300 group/card">
+                  <div className="flex gap-5 items-center">
+                    <div className="w-14 h-14 bg-white text-blue-600 rounded-2xl flex items-center justify-center shadow-sm border border-blue-50 group-hover/card:bg-blue-600 group-hover/card:text-white transition-all">
+                      <Hospital size={28} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Medical Center
+                      </p>
+                      <p className="text-slate-800 font-extrabold text-xl leading-tight">
+                        {request.hospitalName}
+                      </p>
+                      <p className="text-sm text-slate-500 font-medium mt-1">
+                        {request.fullAddress}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Schedule
-                  </p>
-                  <p className="text-slate-800 font-bold text-lg leading-tight">
-                    {request.donationDate}
-                  </p>
-                  <p className="text-sm text-slate-500 mt-1 flex items-center gap-1 italic font-medium tracking-tighter uppercase">
-                    <Clock size={14} /> at {request.donationTime}
-                  </p>
+
+                {/* Schedule */}
+                <div className="p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-xl transition-all duration-300 group/card">
+                  <div className="flex gap-5 items-center">
+                    <div className="w-14 h-14 bg-white text-amber-600 rounded-2xl flex items-center justify-center shadow-sm border border-amber-50 group-hover/card:bg-amber-500 group-hover/card:text-white transition-all">
+                      <Calendar size={28} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Donation Schedule
+                      </p>
+                      <p className="text-slate-800 font-extrabold text-xl leading-tight">
+                        {request.donationDate}
+                      </p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-black flex items-center gap-1 uppercase">
+                          <Clock size={12} /> {request.donationTime}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -199,7 +240,6 @@ const DonationDetails = () => {
           </div>
         </div>
 
-        {/* Right Column: Action & Rules */}
         <div className="space-y-6">
           <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 sticky top-8">
             <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
@@ -243,7 +283,6 @@ const DonationDetails = () => {
         </div>
       </div>
 
-      {/* Modal remains almost same but with dynamic names */}
       <dialog id="donate_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box rounded-[2.5rem] p-0 overflow-hidden bg-white max-w-md border-none">
           <div className="bg-red-600 p-8 text-center text-white">

@@ -18,14 +18,12 @@ import { Link } from 'react-router';
 import Swal from 'sweetalert2';
 
 const DonorDashboard = () => {
-  // Fake User Context (Active/Blocked status check এর জন্য)
   const user = {
     name: 'John Doe',
     email: 'john@example.com',
     status: 'active',
   };
 
-  // Fake Donation Data (স্টেট হিসেবে রাখা হয়েছে যাতে বাটন ক্লিক করলে আপডেট হয়)
   const [requests, setRequests] = useState([
     {
       id: 1,
@@ -118,7 +116,6 @@ const DonorDashboard = () => {
         )}
       </div>
 
-      {/* 2. Recent Requests Section (Visible only if requests exist) */}
       {requests.length > 0 && (
         <div className="bg-white rounded-[35px] shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">

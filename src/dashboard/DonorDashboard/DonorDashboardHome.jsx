@@ -22,7 +22,6 @@ const DonorDashboardHome = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- ডাটাবেস থেকে ডাটা লোড করা ---
   useEffect(() => {
     if (authUser?.email) {
       fetch(`http://localhost:5000/my-donation-requests/${authUser.email}`)
@@ -35,7 +34,6 @@ const DonorDashboardHome = () => {
     }
   }, [authUser]);
 
-  // --- স্ট্যাটাস আপডেট (Done/Canceled) ---
   const handleStatusChange = (id, newStatus) => {
     fetch(`http://localhost:5000/donation-request/${id}`, {
       method: 'PATCH',
@@ -60,7 +58,6 @@ const DonorDashboardHome = () => {
       });
   };
 
-  // --- ডাটাবেস থেকে ডিলিট করা ---
   const handleDelete = (id) => {
     Swal.fire({
       title: 'Are you sure?',
@@ -122,7 +119,6 @@ const DonorDashboardHome = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {/* মাত্র ৩টি লেটেস্ট ডাটা দেখানোর জন্য slice */}
                 {requests.slice(0, 3).map((req) => (
                   <tr
                     key={req._id}
@@ -169,7 +165,6 @@ const DonorDashboardHome = () => {
                         >
                           {req.status}
                         </span>
-                        {/* যদি কোনো ডোনার এক্সেপ্ট করে থাকে */}
                         {req.donorName && (
                           <div className="flex items-center gap-2 mt-2 p-2 bg-slate-50 rounded-xl border border-slate-100">
                             <User size={12} className="text-blue-600" />

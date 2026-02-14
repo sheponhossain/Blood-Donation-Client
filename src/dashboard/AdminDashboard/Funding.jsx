@@ -3,15 +3,12 @@ import { DollarSign, Plus, CreditCard, Wallet } from 'lucide-react';
 import { Link } from 'react-router';
 
 const Funding = () => {
-  // ১. রিয়েল ডাটা স্টেট
   const [fundings, setFundings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ২. সার্ভার থেকে পেমেন্ট হিস্ট্রি ফেচ করা
   const fetchFundings = async () => {
     try {
       setLoading(true);
-      // নিশ্চিত করুন আপনার সার্ভারে /payments এন্ডপয়েন্টটি আছে
       const response = await fetch('http://localhost:5000/payments', {
         headers: {
           authorization: `Bearer ${localStorage.getItem('access-token')}`,
@@ -30,7 +27,6 @@ const Funding = () => {
     fetchFundings();
   }, []);
 
-  // ৩. টোটাল ফান্ড ক্যালকুলেশন
   const totalFunds = fundings.reduce((sum, item) => sum + item.amount, 0);
 
   return (

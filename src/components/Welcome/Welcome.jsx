@@ -13,10 +13,8 @@ const Welcome = ({
   const { user: authUser } = useContext(AuthContext);
   const [dbUser, setDbUser] = useState(null);
 
-  // --- ডাটাবেস থেকে রোল এবং অন্যান্য ডেটা আনার লজিক ---
   useEffect(() => {
     if (authUser?.email) {
-      // আপনার ব্যাকেন্ড এপিআই কল
       axios
         .get(`http://localhost:5000/user/${authUser.email}`)
         .then((res) => {
@@ -30,7 +28,6 @@ const Welcome = ({
 
   const userRole = dbUser?.role || 'User';
 
-  // রোল অনুযায়ী কালার সেট করা
   const getRoleColor = (roleName) => {
     const r = roleName?.toLowerCase();
     if (r === 'admin') return 'bg-purple-600';
@@ -68,7 +65,6 @@ const Welcome = ({
           </h1>
 
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-3">
-            {/* ডায়নামিক রোল ব্যাজ যা ডাটাবেস থেকে আসছে */}
             <span
               className={`px-4 py-1.5 ${getRoleColor(userRole)} text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg transition-colors duration-500`}
             >

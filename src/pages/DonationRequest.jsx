@@ -33,7 +33,6 @@ const DonationRequest = () => {
     );
   };
 
-  // 🔥 SweetAlert2 Success Logic
   const handlePostRequest = (e) => {
     e.preventDefault();
 
@@ -42,7 +41,7 @@ const DonationRequest = () => {
       text: 'Your blood request has been posted successfully.',
       icon: 'success',
       confirmButtonText: 'Great!',
-      confirmButtonColor: '#e11d48', // Blood Red
+      confirmButtonColor: '#e11d48',
       iconColor: '#e11d48',
       background: '#ffffff',
       customClass: {
@@ -169,7 +168,7 @@ const DonationRequest = () => {
                 </select>
               </div>
 
-              {/* 📅 Blood Red Calendar Input */}
+              {/* Blood Red Calendar Input */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Donation Date

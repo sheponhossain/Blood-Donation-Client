@@ -22,27 +22,33 @@ const Login = () => {
     signIn(email, password)
       .then((result) => {
         const user = result.user;
-        console.log(user);
+        const userInfo = { email: user.email };
 
-        Swal.fire({
-          title: 'Login Successful!',
-          text: `Welcome back, ${user?.displayName || 'Donor'}!`,
-          icon: 'success',
-          confirmButtonColor: '#dc2626',
-        });
+        fetch('http://localhost:5000/jwt', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify(userInfo),
+        })
+          .then((res) => res.json())
+          .then((resData) => {
+            if (resData.token) {
+              localStorage.setItem('access-token', resData.token);
 
-        navigate(from, { replace: true });
+              Swal.fire({
+                title: 'Login Successful!',
+                text: `Welcome!`,
+                icon: 'success',
+                confirmButtonColor: '#dc2626',
+              });
+              navigate(from, { replace: true });
+            }
+          });
       })
       .catch((error) => {
         console.error(error);
-
-        // এরর এলার্ট
-        Swal.fire({
-          title: 'Login Failed!',
-          text: error.message || 'Invalid email or password.',
-          icon: 'error',
-          confirmButtonColor: '#dc2626',
-        });
+        Swal.fire({ title: 'Error', text: error.message, icon: 'error' });
       });
   };
 

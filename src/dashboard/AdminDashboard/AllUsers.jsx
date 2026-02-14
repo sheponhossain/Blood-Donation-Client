@@ -16,19 +16,32 @@ const AllUsers = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   const fetchUsers = async () => {
+    const token = localStorage.getItem('access-token');
+
+    if (!token) {
+      console.error('No token found! Please login again.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await fetch('http://localhost:5000/users', {
+        method: 'GET',
         headers: {
-          authorization: `Bearer ${localStorage.getItem('access-token')}`,
+          'content-type': 'application/json',
+          authorization: `Bearer ${token}`,
         },
       });
-      const data = await response.json();
 
+      if (response.status === 403) {
+        console.error('Forbidden: Check if you are an admin in DB');
+      }
+
+      const data = await response.json();
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching users:', error);
-      setUsers([]);
     } finally {
       setLoading(false);
     }

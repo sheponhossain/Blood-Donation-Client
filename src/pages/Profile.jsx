@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../providers/AuthProvider'; // আপনার পাথ অনুযায়ী
+import { AuthContext } from '../providers/AuthProvider';
 import {
   User,
   Mail,
@@ -71,7 +71,6 @@ const Profile = () => {
     setUser({ ...user, [name]: value });
   };
 
-  // ২. ইমেজ পরিবর্তন এবং সরাসরি ImageBB তে আপলোড
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -86,7 +85,7 @@ const Profile = () => {
         didOpen: () => Swal.showLoading(),
       });
 
-      const imgBBKey = '02ede86040a806d18640942ecc23f6cc'; // আপনার Key
+      const imgBBKey = '02ede86040a806d18640942ecc23f6cc';
       const res = await axios.post(
         `https://api.imgbb.com/1/upload?key=${imgBBKey}`,
         formData
@@ -106,16 +105,13 @@ const Profile = () => {
     }
   };
 
-  // ৩. প্রোফাইল আপডেট (Firebase + MongoDB)
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // ফায়ারবেস প্রোফাইল আপডেট
       await updateUserProfile(user.displayName, user.photoURL);
 
-      // আপনার MongoDB ব্যাকেন্ড আপডেট
       const updateData = {
         name: user.displayName,
         avatar: user.photoURL,
@@ -322,9 +318,7 @@ const Profile = () => {
     </div>
   );
 };
-// ... (Profile কম্পোনেন্টের বাকি কোড)
 
-// --- SUB-COMPONENTS ---
 const StatCard = ({ label, value, color }) => (
   <div className="bg-slate-50/50 p-4 rounded-[25px] text-center border border-slate-100 shadow-sm">
     <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">
@@ -373,6 +367,4 @@ const EditableField = ({
   </div>
 );
 
-// এটি নিশ্চিত করুন:
 export default Profile;
-// Sub-components (StatCard, EditableField) আপনার আগের কোডেই থাকবে...

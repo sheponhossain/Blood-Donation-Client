@@ -55,6 +55,7 @@ const SearchPage = () => {
         params: { bloodGroup, division: divisionName, district: districtName },
       });
       setSearchResults(response.data);
+      // eslint-disable-next-line no-unused-vars
     } catch (err) {
       setSearchResults([]);
     } finally {
@@ -257,7 +258,7 @@ const SearchPage = () => {
                   </div>
 
                   <Link
-                    to={`/donation-request-details/${request._id}`}
+                    to={`/blood-details/${request._id}`}
                     className="flex justify-center items-center gap-2 w-full bg-slate-900 text-white py-4 rounded-2xl text-xs font-black tracking-widest hover:bg-red-600 transition-all print:hidden"
                   >
                     DETAILS <ArrowRight size={14} />

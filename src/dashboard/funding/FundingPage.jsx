@@ -16,9 +16,10 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { AuthContext } from '../../providers/AuthProvider';
 
-// Assets (Keep your existing imports)
+// Assets
 import bkashLogo from '../../assets/bkash-logo-png.png';
 import nagadLogo from '../../assets/nagan-logo-png.png';
 import rocketLogo from '../../assets/rocket-png.png';
@@ -189,23 +190,40 @@ const FundingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 pb-20 font-sans">
-      <div className="bg-white px-6 py-20 text-center border-b border-slate-100">
-        <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
-          Support Our <span className="text-red-600">Mission</span>
-        </h1>
-        <p className="text-slate-500 text-sm md:text-base max-w-md mx-auto mb-8 font-medium">
-          Your contribution helps us save lives through our blood network.
-        </p>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-red-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:bg-red-700 transition-all active:scale-95 uppercase tracking-tight"
-        >
-          Donate Now
-        </button>
+      {/* Hero Section */}
+      <div className="relative bg-white px-6 py-28 text-center border-b border-slate-100 overflow-hidden">
+        {/* Lottie Animation in Background */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-70 pointer-events-none">
+          <div className="w-full max-w-9/12 mb-10">
+            <DotLottieReact
+              src="https://lottie.host/4c89fb84-d22e-4bb9-b6b4-809ab0f2aecf/9djO7V6o8h.lottie"
+              loop
+              autoplay
+            />
+          </div>
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
+            Support Our <span className="text-red-600">Mission</span>
+          </h1>
+          <p className="text-slate-500 text-sm md:text-base max-w-md mx-auto mb-8 font-medium">
+            Your contribution helps us save lives through our blood network.
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-red-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:bg-red-700 transition-all active:scale-95 uppercase tracking-tight"
+          >
+            Donate Now
+          </button>
+        </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 -mt-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+      {/* Main Container for Stats & Table */}
+      <div className="max-w-5xl mx-auto px-6 relative z-20">
+        {/* Stat Cards - Positioned to overlap slightly with Hero */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 -mt-12 mb-12">
           <StatCard
             label="Total Raised"
             value={`৳${fundings.reduce((a, b) => a + Number(b.amount), 0).toLocaleString()}`}
@@ -214,6 +232,7 @@ const FundingPage = () => {
           <StatCard label="Impact" value="1.2k+" />
         </div>
 
+        {/* Table Section */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="px-8 py-5 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
@@ -231,7 +250,6 @@ const FundingPage = () => {
                     key={i}
                     className="hover:bg-slate-50/80 transition-all group"
                   >
-                    {/* User Info with Avatar */}
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm border border-white shadow-sm shrink-0">
@@ -248,7 +266,6 @@ const FundingPage = () => {
                       </div>
                     </td>
 
-                    {/* Amount with Highlight */}
                     <td className="px-8 py-5">
                       <div className="flex flex-col">
                         <span className="text-red-600 font-black text-lg tracking-tighter">
@@ -260,7 +277,6 @@ const FundingPage = () => {
                       </div>
                     </td>
 
-                    {/* Method - Now clearly visible */}
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-2">
                         <div className="p-2 bg-slate-50 rounded-xl border border-slate-100 group-hover:border-red-100 group-hover:bg-white transition-all">
@@ -276,7 +292,6 @@ const FundingPage = () => {
                       </div>
                     </td>
 
-                    {/* Date */}
                     <td className="px-8 py-5 text-right">
                       <div className="text-slate-400 font-bold text-[10px] bg-slate-50 px-3 py-1.5 rounded-lg inline-block group-hover:bg-white transition-all">
                         {new Date(f.date).toLocaleDateString('en-GB', {
@@ -294,6 +309,7 @@ const FundingPage = () => {
         </div>
       </div>
 
+      {/* Modal Section (Unchanged) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div
@@ -372,6 +388,8 @@ const FundingPage = () => {
   );
 };
 
+// --- Sub-components (Unchanged) ---
+
 const MethodGrid = ({ title, icon, methods, selected, onSelect }) => (
   <div>
     <div className="flex items-center gap-1.5 text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-3 ml-1">
@@ -402,7 +420,7 @@ const MethodGrid = ({ title, icon, methods, selected, onSelect }) => (
 );
 
 const StatCard = ({ label, value }) => (
-  <div className="bg-white p-7 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:translate-y-[-2px] transition-all">
+  <div className="bg-white p-7 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:translate-y-[-4px] transition-all duration-300">
     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">
       {label}
     </p>

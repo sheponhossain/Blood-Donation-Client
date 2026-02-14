@@ -16,15 +16,14 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Context থেকে user এবং logOut নেওয়া হচ্ছে
   const { user, logOut } = useContext(AuthContext);
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Donation Requests', path: '/donation-requests' },
     { name: 'Blood Requests', path: '/blood-requests' },
     { name: 'Funding', path: '/funding' },
     { name: 'Search', path: '/search' },
+    { name: 'Blog', path: '/blog' },
   ];
 
   const activeStyle =

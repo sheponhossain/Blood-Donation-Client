@@ -44,13 +44,10 @@ const AuthProvider = ({ children }) => {
     });
   };
 
-  // 5. Observer (User state track kora)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       console.log('Current User:', currentUser);
-
-      // Ekhane amra JWT token er logic handle korbo pore
       setLoading(false);
     });
     return () => {

@@ -31,11 +31,9 @@ const EditDonationRequest = () => {
   const labelClasses =
     'text-[11px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1 block';
 
-  // useEffect er bhetore data load hobar ongsho-ti eibhabe modify korun
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // ১. আগে Location JSON গুলো fetch করে ফেলি
         const [divRes, disRes] = await Promise.all([
           fetch(`${window.location.origin}/divisions.json`).then((res) =>
             res.json()
@@ -47,16 +45,10 @@ const EditDonationRequest = () => {
 
         setDivisions(divRes);
         setAllDistricts(disRes);
-
-        // ২. এবার DB থেকে Data আনি
         const res = await axiosSecure.get(`/donation-request/${id}`);
         const data = res.data;
 
         if (data) {
-          /* ম্যাজিক পার্ট: 
-          ডাটাবেসে যদি 'Dhaka' (নাম) থাকে কিন্তু আপনার সিলেক্ট ফিল্ড ID (1, 2) দিয়ে কাজ করে, 
-          তবে আমাদের JSON থেকে ওই নামের ID খুঁজে বের করতে হবে।
-        */
           const matchedDivision = divRes.find(
             (d) => d.name.toLowerCase() === (data.division || '').toLowerCase()
           );
@@ -64,14 +56,13 @@ const EditDonationRequest = () => {
           setFormData({
             recipientName: data.recipientName || '',
             bloodGroup: data.bloodGroup || '',
-            // যদি ID পাওয়া যায় তবে সেটা দেবে, নাহলে ডাটাবেসেরটা
             recipientDistrict: matchedDivision
               ? String(matchedDivision.id)
               : data.recipientDistrict || '',
             recipientUpazila: data.district || data.recipientUpazila || '',
             hospitalName: data.hospitalName || '',
             fullAddress: data.fullAddress || '',
-            division: data.division || '', // ব্যাকএন্ডের জন্য নাম সেভ রাখা
+            division: data.division || '',
             donationDate: data.donationDate || '',
             donationTime: data.donationTime || '',
             requestMessage: data.message || data.requestMessage || '',
@@ -98,7 +89,7 @@ const EditDonationRequest = () => {
         ...prev,
         recipientDistrict: value,
         division: selectedDiv ? selectedDiv.name : '',
-        recipientUpazila: '', // Division change hole district reset hoye jabe
+        recipientUpazila: '',
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -159,7 +150,6 @@ const EditDonationRequest = () => {
 
         <form onSubmit={handleUpdate} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Recipient Name & Blood Group (Ager motoi thakbe) */}
             <div className="flex flex-col">
               <label className={labelClasses}>Recipient Name</label>
               <input
@@ -190,12 +180,11 @@ const EditDonationRequest = () => {
               </select>
             </div>
 
-            {/* Division Selector: value={String(...)} auto-select nishchit korbe */}
             <div className="flex flex-col">
               <label className={labelClasses}>Recipient Division</label>
               <select
                 name="recipientDistrict"
-                value={formData.recipientDistrict} // সরাসরি formData থেকে value নেবে
+                value={formData.recipientDistrict}
                 onChange={handleChange}
                 className={inputClasses}
                 required
@@ -209,12 +198,11 @@ const EditDonationRequest = () => {
               </select>
             </div>
 
-            {/* District Selector: Ekhane value match korbe district name-er sathe */}
             <div className="flex flex-col">
               <label className={labelClasses}>Recipient District</label>
               <select
                 name="recipientUpazila"
-                value={formData.recipientUpazila} // District Name আসবে
+                value={formData.recipientUpazila}
                 onChange={handleChange}
                 className={inputClasses}
                 required
@@ -235,7 +223,6 @@ const EditDonationRequest = () => {
               </select>
             </div>
 
-            {/* Baki fields: Hospital, Address, Date, Time */}
             <div className="flex flex-col">
               <label className={labelClasses}>Hospital Name</label>
               <input
