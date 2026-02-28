@@ -12,7 +12,7 @@ const DashboardIndex = () => {
   useEffect(() => {
     if (user?.email) {
       fetch(
-        `https://blood-donation-server-snowy-six.vercel.app/user/${user.email}`
+        `https://blood-donation-server-nu-lyart.vercel.app/user/${user.email}`
       )
         .then((res) => res.json())
         .then((data) => {

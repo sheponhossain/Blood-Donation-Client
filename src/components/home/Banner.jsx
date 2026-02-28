@@ -4,7 +4,8 @@ import BloodDonationBG from '../../assets/BloodDonationBG.mp4';
 
 const Banner = () => {
   return (
-    <div className="relative w-full h-screen min-h-[600px] max-h-[900px] flex items-center overflow-hidden bg-black">
+    // h-[60vh] lg:h-[70vh] দিয়ে হাইট ৬০% থেকে ৭০% এর মধ্যে রাখা হয়েছে
+    <div className="relative w-full h-[60vh] lg:h-[70vh] min-h-[450px] max-h-[750px] flex items-center overflow-hidden bg-black">
       {/* --- Video Background --- */}
       <div className="absolute inset-0 z-0">
         <video
@@ -17,45 +18,46 @@ const Banner = () => {
           <source src={BloodDonationBG} type="video/mp4" />
         </video>
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
       </div>
 
       <div className="container mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-20">
         {/* Left Content */}
-        <div className="space-y-6 lg:space-y-8 animate-fadeInLeft">
-          <div className="inline-block px-4 py-1 rounded-full bg-red-600 text-white font-semibold text-xs lg:text-sm tracking-wide uppercase">
+        <div className="space-y-4 lg:space-y-6 animate-fadeInLeft">
+          <div className="inline-block px-4 py-1 rounded-full bg-red-600 text-white font-semibold text-[10px] lg:text-xs tracking-wide uppercase shadow-lg shadow-red-900/20">
             ❤️ Saving Lives Since 2024
           </div>
 
-          <h1 className="text-4xl lg:text-7xl font-extrabold text-white leading-tight">
+          <h1 className="text-3xl lg:text-6xl font-extrabold text-white leading-tight tracking-tighter">
             Donate <span className="text-red-500">Blood</span>, <br />
             Inspire{' '}
             <span className="relative inline-block">
               Hope.
-              <span className="absolute bottom-2 left-0 w-full h-2 lg:h-3 bg-red-600/30 -z-10"></span>
+              <span className="absolute bottom-1 lg:bottom-2 left-0 w-full h-2 lg:h-3 bg-red-600/40 -z-10"></span>
             </span>
           </h1>
 
-          <p className="text-gray-200 text-base lg:text-xl max-w-lg leading-relaxed">
+          <p className="text-gray-300 text-sm lg:text-lg max-w-lg leading-relaxed font-medium">
             Your contribution can make a difference between life and death. Join
             our community of heroes and help us bridge the gap.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 lg:gap-5">
+          <div className="flex flex-col sm:flex-row items-center gap-4 lg:gap-5 pt-2">
             <Link
               to="/register"
-              className="group relative w-full sm:w-auto px-8 py-4 bg-red-600 text-white font-bold rounded-xl shadow-lg hover:bg-red-700 hover:-translate-y-1 transition-all duration-300 text-center"
+              className="group relative w-full sm:w-auto px-8 py-3.5 bg-red-600 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-xl hover:bg-red-700 hover:-translate-y-1 transition-all duration-300 text-center active:scale-95"
             >
               Join as a Donor
             </Link>
 
             <Link
               to="/search"
-              className="w-full sm:w-auto px-8 py-4 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 backdrop-blur-md transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-3.5 border-2 border-white/20 text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-white/10 backdrop-blur-md transition-all duration-300 flex items-center justify-center gap-2 active:scale-95"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
+                className="h-4 w-4"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >

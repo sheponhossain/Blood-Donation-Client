@@ -89,7 +89,7 @@ const Register = () => {
           role: 'donor',
         };
         const serverRes = await axios.post(
-          'https://blood-donation-server-snowy-six.vercel.app/register',
+          'https://blood-donation-server-nu-lyart.vercel.app/register',
           newUser
         );
 

@@ -9,8 +9,11 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { useTheme } from '../../context/ThemeContext';
 
 const ContactUs = () => {
+  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট ব্যবহার
+
   const handleSubmit = (e) => {
     e.preventDefault();
     Swal.fire({
@@ -18,23 +21,25 @@ const ContactUs = () => {
       text: 'Our team will contact you within 24 hours.',
       icon: 'success',
       confirmButtonColor: '#ef4444',
+      background: theme === 'dark' ? '#0f172a' : '#fff', // ডার্ক মোডে অ্যালার্ট ব্যাকগ্রাউন্ড
+      color: theme === 'dark' ? '#fff' : '#000',
       customClass: { popup: 'rounded-[30px]' },
     });
   };
 
   return (
-    <section className="py-24 bg-white">
+    // ৩. ডার্ক মোড সাপোর্ট সহ মেইন সেকশন
+    <section className="py-24 bg-white dark:bg-slate-950 transition-colors duration-300">
       <div className="container mx-auto px-6 max-w-6xl">
-        <div className="bg-slate-900 rounded-[50px] overflow-hidden shadow-2xl flex flex-col lg:flex-row">
-          {/* Left Panel: Contact Info (Dark Theme) */}
-          <div className="lg:w-2/5 bg-gradient-to-br from-red-600 to-rose-700 p-12 text-white relative overflow-hidden">
-            {/* Decorative circles */}
+        <div className="bg-slate-900 dark:bg-slate-900 rounded-[50px] overflow-hidden shadow-2xl flex flex-col lg:flex-row border dark:border-slate-800">
+          {/* Left Panel: Contact Info (সর্বদাই রঙিন/ডার্ক থাকবে আপনার ডিজাইন অনুযায়ী) */}
+          <div className="lg:w-2/5 bg-gradient-to-br from-red-600 to-rose-700 dark:from-red-900 dark:to-slate-900 p-12 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
             <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-black/20 rounded-full blur-3xl"></div>
 
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
-                <h2 className="text-4xl font-black tracking-tighter mb-6 leading-tight">
+                <h2 className="text-4xl font-black tracking-tighter mb-6 leading-tight uppercase">
                   Let's save <br /> lives together.
                 </h2>
                 <p className="text-red-100 text-sm font-medium leading-relaxed opacity-80 max-w-[280px]">
@@ -72,10 +77,10 @@ const ContactUs = () => {
             </div>
           </div>
 
-          {/* Right Panel: Form (Light Theme) */}
-          <div className="lg:w-3/5 bg-white p-12">
+          {/* Right Panel: Form (ডার্ক মোডে এটি স্লেট কালার হবে) */}
+          <div className="lg:w-3/5 bg-white dark:bg-slate-900 p-12 transition-colors duration-300">
             <div className="mb-10">
-              <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-2">
+              <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight mb-2 uppercase">
                 Send a Message
               </h3>
               <div className="h-1 w-10 bg-red-600 rounded-full"></div>
@@ -86,32 +91,32 @@ const ContactUs = () => {
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
                   Full Name
                 </label>
                 <input
                   type="text"
-                  className="w-full px-6 py-4 bg-slate-50 border-transparent border-2 focus:border-red-100 focus:bg-white rounded-2xl transition-all outline-none font-bold text-slate-700"
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-transparent border-2 focus:border-red-100 dark:focus:border-red-900/50 focus:bg-white dark:focus:bg-slate-800 rounded-2xl transition-all outline-none font-bold text-slate-700 dark:text-slate-200"
                   placeholder="John Doe"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
                   Email
                 </label>
                 <input
                   type="email"
-                  className="w-full px-6 py-4 bg-slate-50 border-transparent border-2 focus:border-red-100 focus:bg-white rounded-2xl transition-all outline-none font-bold text-slate-700"
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-transparent border-2 focus:border-red-100 dark:focus:border-red-900/50 focus:bg-white dark:focus:bg-slate-800 rounded-2xl transition-all outline-none font-bold text-slate-700 dark:text-slate-200"
                   placeholder="john@example.com"
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
                   Your Message
                 </label>
                 <textarea
                   rows="4"
-                  className="w-full px-6 py-4 bg-slate-50 border-transparent border-2 focus:border-red-100 focus:bg-white rounded-2xl transition-all outline-none font-bold text-slate-700 resize-none"
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-transparent border-2 focus:border-red-100 dark:focus:border-red-900/50 focus:bg-white dark:focus:bg-slate-800 rounded-2xl transition-all outline-none font-bold text-slate-700 dark:text-slate-200 resize-none"
                   placeholder="Tell us how we can help..."
                 ></textarea>
               </div>
@@ -119,7 +124,7 @@ const ContactUs = () => {
               <div className="md:col-span-2 pt-4">
                 <button
                   type="submit"
-                  className="group w-full cursor-pointer md:w-auto px-12 py-5 bg-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3"
+                  className="group w-full cursor-pointer md:w-auto px-12 py-5 bg-slate-900 dark:bg-red-600 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-red-600 dark:hover:bg-red-700 transition-all shadow-xl shadow-slate-200 dark:shadow-none flex items-center justify-center gap-3"
                 >
                   Submit Message{' '}
                   <ArrowRight

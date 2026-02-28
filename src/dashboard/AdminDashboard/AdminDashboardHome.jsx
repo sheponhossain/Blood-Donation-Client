@@ -3,11 +3,8 @@ import {
   Users,
   DollarSign,
   GitPullRequest,
-  Plus,
   ArrowUpRight,
-  Activity,
   TrendingUp,
-  Calendar,
   ArrowDownRight,
 } from 'lucide-react';
 import { Link } from 'react-router';
@@ -19,12 +16,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
 } from 'recharts';
 import Welcome from '../../components/Welcome/Welcome';
+import { useTheme } from '../../context/ThemeContext';
 
 const AdminDashboardHome = () => {
+  const { theme } = useTheme(); // থিম লজিক
   const [period, setPeriod] = useState('Daily');
   const [dbStats, setDbStats] = useState({
     totalDonors: 0,
@@ -33,9 +30,11 @@ const AdminDashboardHome = () => {
   });
 
   useEffect(() => {
-    fetch('https://blood-donation-server-snowy-six.vercel.app/admin-stats')
+    fetch('https://blood-donation-server-nu-lyart.vercel.app/admin-stats')
       .then((res) => res.json())
-      .then((data) => setDbStats(data))
+      .then((data) => {
+        if (data) setDbStats(data);
+      })
       .catch((err) => console.error('Stats fetch error:', err));
   }, []);
 
@@ -65,31 +64,32 @@ const AdminDashboardHome = () => {
     ],
   };
 
+  // Optional Chaining (?.) এবং Fallback (|| 0) ব্যবহার করা হয়েছে এরর এড়াতে
   const stats = [
     {
       id: 1,
       title: 'Total Donors',
-      count: dbStats.totalDonors.toLocaleString(),
+      count: (dbStats?.totalDonors || 0).toLocaleString(),
       icon: <Users size={20} />,
-      color: 'bg-red-50',
-      textColor: 'text-red-600',
+      color: 'bg-red-50 dark:bg-red-900/20',
+      textColor: 'text-red-600 dark:text-red-400',
       trend: '+12%',
       isUp: true,
     },
     {
       id: 2,
       title: 'Total Funding',
-      count: `$${dbStats.totalFunding.toLocaleString()}`,
+      count: `$${(dbStats?.totalFunding || 0).toLocaleString()}`,
       icon: <DollarSign size={20} />,
-      color: 'bg-slate-100',
-      textColor: 'text-slate-900',
+      color: 'bg-slate-100 dark:bg-slate-800',
+      textColor: 'text-slate-900 dark:text-slate-100',
       trend: '+5.4%',
       isUp: true,
     },
     {
       id: 3,
       title: 'Requests',
-      count: dbStats.totalRequests.toLocaleString(),
+      count: (dbStats?.totalRequests || 0).toLocaleString(),
       icon: <GitPullRequest size={20} />,
       color: 'bg-red-500',
       textColor: 'text-white',
@@ -99,16 +99,15 @@ const AdminDashboardHome = () => {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-1000 pb-10">
-      {/* Header with Glassmorphism Effect */}
+    <div className="space-y-8 animate-in fade-in duration-1000 pb-10 transition-colors duration-300">
       <Welcome />
 
-      {/*  Enhanced Stats Cards */}
+      {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat) => (
           <div
             key={stat.id}
-            className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300"
+            className="bg-white dark:bg-slate-900 p-6 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-all duration-300"
           >
             <div className="flex justify-between items-center mb-4">
               <div
@@ -117,7 +116,11 @@ const AdminDashboardHome = () => {
                 {stat.icon}
               </div>
               <span
-                className={`flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-lg ${stat.isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}
+                className={`flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-lg ${
+                  stat.isUp
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600'
+                    : 'bg-red-50 dark:bg-red-900/20 text-red-600'
+                }`}
               >
                 {stat.isUp ? (
                   <TrendingUp size={12} />
@@ -128,10 +131,10 @@ const AdminDashboardHome = () => {
               </span>
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                 {stat.title}
               </p>
-              <h3 className="text-3xl font-black text-slate-900 mt-1">
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">
                 {stat.count}
               </h3>
             </div>
@@ -139,27 +142,31 @@ const AdminDashboardHome = () => {
         ))}
       </div>
 
-      {/*  Main Chart Section - Clean & Informative */}
-      <div className="bg-white p-8 md:p-10 rounded-[40px] shadow-sm border border-slate-100">
+      {/* Main Chart Section */}
+      <div className="bg-white dark:bg-slate-900 p-8 md:p-10 rounded-[40px] shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="w-2 h-6 bg-red-600 rounded-full"></div>
-              <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tight">
+              <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight">
                 Request Analytics
               </h3>
             </div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] ml-4">
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] ml-4">
               Detailed donation metrics
             </p>
           </div>
 
-          <div className="inline-flex bg-slate-100 p-1.5 rounded-2xl w-full lg:w-auto">
+          <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl w-full lg:w-auto">
             {['Daily', 'Weekly', 'Monthly'].map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`flex-1 lg:flex-none px-6 py-2.5 cursor-pointer rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${period === p ? 'bg-white text-red-600 shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 lg:flex-none px-6 py-2.5 cursor-pointer rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                  period === p
+                    ? 'bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 shadow-md'
+                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'
+                }`}
               >
                 {p}
               </button>
@@ -182,63 +189,67 @@ const AdminDashboardHome = () => {
               <CartesianGrid
                 strokeDasharray="8 8"
                 vertical={false}
-                stroke="#f1f5f9"
+                stroke={theme === 'dark' ? '#1e293b' : '#f1f5f9'}
               />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }}
+                tick={{
+                  fill: theme === 'dark' ? '#64748b' : '#94a3b8',
+                  fontSize: 10,
+                  fontWeight: 800,
+                }}
                 dy={15}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }}
+                tick={{
+                  fill: theme === 'dark' ? '#64748b' : '#94a3b8',
+                  fontSize: 10,
+                  fontWeight: 800,
+                }}
               />
               <Tooltip
-                cursor={{ stroke: '#cbd5e1', strokeWidth: 1 }}
                 contentStyle={{
+                  backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff',
                   borderRadius: '24px',
                   border: 'none',
                   boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
-                  padding: '20px',
+                  color: theme === 'dark' ? '#f8fafc' : '#0f172a',
                 }}
-                itemStyle={{ fontWeight: 900, fontSize: '12px' }}
               />
               <Area
                 type="monotone"
                 dataKey="requests"
                 stroke="#ef4444"
                 strokeWidth={5}
-                fillOpacity={1}
                 fill="url(#paintRequests)"
-                animationDuration={1500}
               />
               <Area
                 type="monotone"
                 dataKey="donors"
-                stroke="#0f172a"
+                stroke={theme === 'dark' ? '#94a3b8' : '#0f172a'}
                 strokeWidth={5}
                 strokeDasharray="10 10"
                 fill="transparent"
-                animationDuration={2000}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Chart Legend */}
-        <div className="mt-8 flex justify-center gap-8 border-t border-slate-50 pt-8">
+        {/* Legend */}
+        <div className="mt-8 flex justify-center gap-8 border-t border-slate-50 dark:border-slate-800 pt-8">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-600"></div>
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               Requests
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full border-2 border-slate-900 border-dashed"></div>
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            <div className="w-3 h-3 rounded-full border-2 border-slate-900 dark:border-slate-400 border-dashed"></div>
+            <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               Active Donors
             </span>
           </div>
@@ -249,14 +260,14 @@ const AdminDashboardHome = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Link
           to="/dashboard/all-users"
-          className="group bg-slate-900 rounded-[40px] p-8 text-white flex justify-between items-center transition-all hover:bg-slate-800"
+          className="group bg-slate-900 dark:bg-slate-800 rounded-[40px] p-8 text-white flex justify-between items-center transition-all hover:bg-slate-800 dark:hover:bg-slate-700"
         >
           <div className="space-y-2">
             <h3 className="text-lg font-black uppercase italic tracking-widest">
               User Management
             </h3>
-            <p className="text-slate-400 text-xs font-medium">
-              View all donors and volunteers,{stats[0].count} manage roles and
+            <p className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+              View all donors and volunteers, {stats[0].count} manage roles and
               access.
             </p>
           </div>
@@ -273,7 +284,7 @@ const AdminDashboardHome = () => {
             <h3 className="text-lg font-black uppercase italic tracking-widest">
               Donation Requests
             </h3>
-            <p className="text-red-100 text-xs font-medium">
+            <p className="text-red-100 dark:text-red-200 text-xs font-medium">
               Review and monitor all blood donation requests across the system.
             </p>
           </div>

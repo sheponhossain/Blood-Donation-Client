@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../providers/AuthProvider';
+
 import {
   User,
   Mail,
@@ -17,8 +18,10 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { useTheme } from '../context/ThemeContext';
 
 const Profile = () => {
+  const { theme } = useTheme();
   const { user: authUser, updateUserProfile } = useContext(AuthContext);
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,7 +43,7 @@ const Profile = () => {
       setLoading(true);
       axios
         .get(
-          `https://blood-donation-server-snowy-six.vercel.app/user/${authUser.email}`
+          `https://blood-donation-server-nu-lyart.vercel.app/user/${authUser.email}`
         )
         .then((res) => {
           const data = res.data;
@@ -84,6 +87,8 @@ const Profile = () => {
       Swal.fire({
         title: 'Uploading...',
         allowOutsideClick: false,
+        background: theme === 'dark' ? '#1e293b' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#000',
         didOpen: () => Swal.showLoading(),
       });
 
@@ -95,15 +100,23 @@ const Profile = () => {
 
       if (res.data.success) {
         setUser({ ...user, photoURL: res.data.data.display_url });
-        Swal.fire(
-          'Success!',
-          'Image uploaded. Click save to finalize.',
-          'success'
-        );
+        Swal.fire({
+          title: 'Success!',
+          text: 'Image uploaded. Click save to finalize.',
+          icon: 'success',
+          background: theme === 'dark' ? '#1e293b' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
+        });
       }
       // eslint-disable-next-line no-unused-vars
     } catch (err) {
-      Swal.fire('Error', 'Image upload failed', 'error');
+      Swal.fire({
+        title: 'Error',
+        text: 'Image upload failed',
+        icon: 'error',
+        background: theme === 'dark' ? '#1e293b' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#000',
+      });
     }
   };
 
@@ -123,7 +136,7 @@ const Profile = () => {
       };
 
       const response = await axios.patch(
-        `https://blood-donation-server-snowy-six.vercel.app/user-update/${user.email}`,
+        `https://blood-donation-server-nu-lyart.vercel.app/user-update/${user.email}`,
         updateData
       );
 
@@ -134,10 +147,18 @@ const Profile = () => {
           text: 'Profile updated successfully',
           icon: 'success',
           confirmButtonColor: '#e11d48',
+          background: theme === 'dark' ? '#1e293b' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
         });
       }
     } catch (error) {
-      Swal.fire('Error!', error.message, 'error');
+      Swal.fire({
+        title: 'Error!',
+        text: error.message,
+        icon: 'error',
+        background: theme === 'dark' ? '#1e293b' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#000',
+      });
     } finally {
       setLoading(false);
     }
@@ -145,19 +166,19 @@ const Profile = () => {
 
   if (loading && !user.email)
     return (
-      <div className="min-h-screen flex items-center justify-center font-black animate-pulse">
+      <div className="min-h-screen flex items-center justify-center font-black animate-pulse dark:bg-slate-950 dark:text-white">
         LOADING PROFILE CORE...
       </div>
     );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 pb-10">
+    <div className="max-w-6xl mx-auto space-y-10 pb-10 transition-colors duration-300">
       <div className="relative h-48 w-full bg-gradient-to-r from-red-600 to-rose-400 rounded-t-[40px] shadow-lg">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
       </div>
 
       <div className="relative -mt-32 px-6 md:px-12">
-        <div className="bg-white/80 backdrop-blur-md rounded-[40px] shadow-2xl border border-white/20 p-8 md:p-12">
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[40px] shadow-2xl border border-white/20 dark:border-slate-800 p-8 md:p-12">
           <form
             onSubmit={handleUpdate}
             className="flex flex-col lg:flex-row gap-12"
@@ -167,7 +188,7 @@ const Profile = () => {
                 <div className="absolute -inset-1 bg-gradient-to-tr from-red-600 to-rose-400 rounded-full blur opacity-20"></div>
                 <img
                   src={user.photoURL || 'https://via.placeholder.com/150'}
-                  className="relative w-44 h-44 rounded-full border-8 border-white object-cover shadow-2xl"
+                  className="relative w-44 h-44 rounded-full border-8 border-white dark:border-slate-800 object-cover shadow-2xl"
                   alt="Profile"
                 />
                 {isEditable && (
@@ -189,14 +210,14 @@ const Profile = () => {
               </div>
 
               <div className="text-center mt-8 space-y-3">
-                <h1 className="text-3xl font-black text-slate-800 tracking-tighter uppercase italic">
+                <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tighter uppercase italic">
                   {user.displayName}
                 </h1>
                 <div className="flex gap-2 justify-center">
-                  <span className="px-4 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-100">
+                  <span className="px-4 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-100 dark:border-red-900/50">
                     {user.role}
                   </span>
-                  <span className="px-4 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100 flex items-center gap-1">
+                  <span className="px-4 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/50 flex items-center gap-1">
                     <Activity size={10} /> {user.status}
                   </span>
                 </div>
@@ -206,14 +227,14 @@ const Profile = () => {
                 <StatCard
                   label="Blood"
                   value={user.bloodGroup}
-                  color="text-red-600"
+                  color="text-red-600 dark:text-red-500"
                 />
               </div>
             </div>
 
             <div className="lg:w-2/3 space-y-10">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-6">
-                <h2 className="text-xl font-black text-slate-800 tracking-widest flex items-center gap-3">
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-6">
+                <h2 className="text-xl font-black text-slate-800 dark:text-white tracking-widest flex items-center gap-3">
                   <ShieldCheck className="text-red-600" size={24} /> PROFILE
                   CORE
                 </h2>
@@ -222,7 +243,7 @@ const Profile = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditable(true)}
-                    className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-xl shadow-slate-200"
+                    className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-slate-900 dark:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 dark:hover:bg-red-700 transition-all shadow-xl shadow-slate-200 dark:shadow-none"
                   >
                     <Edit3 size={14} /> Edit Profile
                   </button>
@@ -230,14 +251,14 @@ const Profile = () => {
                   <div className="flex gap-3">
                     <button
                       type="submit"
-                      className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+                      className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 dark:shadow-none"
                     >
                       <Save size={14} /> {loading ? 'Saving...' : 'Save'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsEditable(false)}
-                      className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all"
+                      className="flex cursor-pointer items-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
                     >
                       <X size={14} /> Cancel
                     </button>
@@ -307,9 +328,12 @@ const Profile = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl w-fit">
-                <Calendar size={16} className="text-slate-400" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl w-fit transition-colors">
+                <Calendar
+                  size={16}
+                  className="text-slate-400 dark:text-slate-500"
+                />
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                   Member Since: {user.joinedDate}
                 </span>
               </div>
@@ -322,8 +346,8 @@ const Profile = () => {
 };
 
 const StatCard = ({ label, value, color }) => (
-  <div className="bg-slate-50/50 p-4 rounded-[25px] text-center border border-slate-100 shadow-sm">
-    <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">
+  <div className="bg-slate-50/50 dark:bg-slate-800/30 p-4 rounded-[25px] text-center border border-slate-100 dark:border-slate-800 shadow-sm transition-colors">
+    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter mb-1">
       {label}
     </p>
     <p className={`text-xl font-black ${color}`}>{value}</p>
@@ -340,8 +364,8 @@ const EditableField = ({
   isSelect,
   options,
 }) => (
-  <div className="relative border-b-2 border-slate-100 focus-within:border-red-500 transition-colors pb-1">
-    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+  <div className="relative border-b-2 border-slate-100 dark:border-slate-800 focus-within:border-red-500 transition-colors pb-1">
+    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
       {icon} {label}
     </p>
     {isSelect && editable ? (
@@ -349,10 +373,10 @@ const EditableField = ({
         name={name}
         value={value}
         onChange={onChange}
-        className="w-full bg-transparent font-black text-slate-800 outline-none py-1 appearance-none cursor-pointer"
+        className="w-full bg-transparent font-black text-slate-800 dark:text-white outline-none py-1 appearance-none cursor-pointer"
       >
         {options.map((opt) => (
-          <option key={opt} value={opt}>
+          <option key={opt} value={opt} className="dark:bg-slate-900">
             {opt}
           </option>
         ))}
@@ -363,7 +387,7 @@ const EditableField = ({
         value={value}
         onChange={onChange}
         disabled={!editable}
-        className={`w-full bg-transparent font-black text-slate-800 outline-none py-1 ${!editable ? 'opacity-70 cursor-not-allowed' : 'text-red-600'}`}
+        className={`w-full bg-transparent font-black text-slate-800 dark:text-white outline-none py-1 ${!editable ? 'opacity-70 cursor-not-allowed' : 'text-red-600 dark:text-red-500'}`}
       />
     )}
   </div>

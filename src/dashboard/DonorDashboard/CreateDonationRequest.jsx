@@ -13,9 +13,12 @@ import {
 } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../providers/AuthProvider';
+
 import useAxiosSecure from '../../Hooks/useAxiosSecure';
+import { useTheme } from '../../context/ThemeContext';
 
 const CreateDonationRequest = () => {
+  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
   const { user, loading } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
@@ -48,7 +51,7 @@ const CreateDonationRequest = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center dark:bg-slate-950">
         <span className="loading loading-bars loading-lg text-red-600"></span>
       </div>
     );
@@ -56,13 +59,13 @@ const CreateDonationRequest = () => {
 
   if (user?.status === 'blocked') {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-white p-12 rounded-[50px] shadow-2xl border border-red-50 max-w-lg">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center transition-colors">
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-[50px] shadow-2xl border border-red-50 dark:border-red-900/20 max-w-lg">
           <FaBan className="text-red-600 text-7xl mx-auto mb-6 animate-pulse" />
-          <h2 className="text-4xl font-black text-gray-800 uppercase italic tracking-tighter">
+          <h2 className="text-4xl font-black text-gray-800 dark:text-white uppercase italic tracking-tighter">
             Access Denied
           </h2>
-          <p className="mt-4 text-gray-500 font-medium">
+          <p className="mt-4 text-gray-500 dark:text-slate-400 font-medium">
             Your account has been{' '}
             <span className="text-red-600 font-bold">blocked</span>. Blocked
             users are not permitted to create blood donation requests.
@@ -100,30 +103,33 @@ const CreateDonationRequest = () => {
           text: 'Your blood request is now pending for donors.',
           icon: 'success',
           confirmButtonColor: '#e11d48',
+          background: theme === 'dark' ? '#1e293b' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
           customClass: { popup: 'rounded-[30px]' },
         });
         form.reset();
         setStartDate(new Date());
       }
     } catch (err) {
-      console.error('Request Failed:', err.response?.data || err.message);
       Swal.fire({
         title: 'Error!',
         text:
           err.response?.data?.message || 'Failed to post request. Try again!',
         icon: 'error',
+        background: theme === 'dark' ? '#1e293b' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#000',
       });
     }
   };
 
   const inputClasses =
-    'w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition-all shadow-inner font-semibold text-gray-700';
+    'w-full px-5 py-4 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-red-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all shadow-inner font-semibold text-gray-700 dark:text-slate-200';
   const labelClasses =
-    'text-xs font-bold text-gray-400 uppercase tracking-widest ml-2 mb-1 block';
+    'text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest ml-2 mb-1 block';
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] py-16 px-4 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#e11d48_1.5px,transparent_1.5px)] [background-size:25px_25px]"></div>
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 py-16 px-4 relative overflow-hidden transition-colors duration-300">
+      <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-[radial-gradient(#e11d48_1.5px,transparent_1.5px)] [background-size:25px_25px]"></div>
 
       <div className="max-w-4xl mx-auto relative">
         <div className="bg-gradient-to-r from-red-600 to-rose-500 rounded-t-[40px] pt-12 pb-24 px-10 text-center shadow-lg">
@@ -132,31 +138,31 @@ const CreateDonationRequest = () => {
           </h2>
         </div>
 
-        <div className="bg-white rounded-[40px] shadow-2xl p-8 md:p-14 -mt-16 border border-white relative z-10">
+        <div className="bg-white dark:bg-slate-900 rounded-[40px] shadow-2xl p-8 md:p-14 -mt-16 border border-white dark:border-slate-800 relative z-10 transition-colors">
           <form onSubmit={handlePostRequest} className="space-y-8">
             {/* Requester Info (Read Only) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-6 rounded-[30px] border border-slate-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[30px] border border-slate-100 dark:border-slate-800">
               <div className="space-y-2">
                 <label className={labelClasses}>Requester Name</label>
                 <div className="relative">
-                  <FaUser className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <FaUser className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600" />
                   <input
                     type="text"
                     value={user?.displayName || ''}
                     readOnly
-                    className={`${inputClasses} pl-12 bg-slate-200 opacity-70 cursor-not-allowed`}
+                    className={`${inputClasses} pl-12 bg-slate-200 dark:bg-slate-800/80 opacity-70 cursor-not-allowed`}
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className={labelClasses}>Requester Email</label>
                 <div className="relative">
-                  <FaEnvelope className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <FaEnvelope className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600" />
                   <input
                     type="email"
                     value={user?.email || ''}
                     readOnly
-                    className={`${inputClasses} pl-12 bg-slate-200 opacity-70 cursor-not-allowed`}
+                    className={`${inputClasses} pl-12 bg-slate-200 dark:bg-slate-800/80 opacity-70 cursor-not-allowed`}
                   />
                 </div>
               </div>
@@ -182,10 +188,12 @@ const CreateDonationRequest = () => {
                   required
                   className={inputClasses + ' cursor-pointer'}
                 >
-                  <option value="">Select Group</option>
+                  <option value="" className="dark:bg-slate-900">
+                    Select Group
+                  </option>
                   {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(
                     (g) => (
-                      <option key={g} value={g}>
+                      <option key={g} value={g} className="dark:bg-slate-900">
                         {g}
                       </option>
                     )
@@ -234,9 +242,15 @@ const CreateDonationRequest = () => {
                   className={inputClasses}
                   required
                 >
-                  <option value="">Select Division</option>
+                  <option value="" className="dark:bg-slate-900">
+                    Select Division
+                  </option>
                   {allDivisions.map((div) => (
-                    <option key={div.id} value={div.id}>
+                    <option
+                      key={div.id}
+                      value={div.id}
+                      className="dark:bg-slate-900"
+                    >
                       {div.name}
                     </option>
                   ))}
@@ -251,9 +265,15 @@ const CreateDonationRequest = () => {
                   className={inputClasses}
                   required
                 >
-                  <option value="">Select District</option>
+                  <option value="" className="dark:bg-slate-900">
+                    Select District
+                  </option>
                   {filteredDistricts.map((dis) => (
-                    <option key={dis.id} value={dis.name}>
+                    <option
+                      key={dis.id}
+                      value={dis.name}
+                      className="dark:bg-slate-900"
+                    >
                       {dis.name}
                     </option>
                   ))}
@@ -282,7 +302,7 @@ const CreateDonationRequest = () => {
                   <DatePicker
                     selected={startDate}
                     onChange={(date) => setStartDate(date)}
-                    className="w-full pl-12 pr-5 py-4 bg-red-50 border border-red-100 rounded-2xl focus:ring-2 focus:ring-red-500 text-red-700 font-bold outline-none cursor-pointer"
+                    className="w-full pl-12 pr-5 py-4 bg-red-50 dark:bg-slate-800 border border-red-100 dark:border-red-900/20 rounded-2xl focus:ring-2 focus:ring-red-500 text-red-700 dark:text-red-400 font-bold outline-none cursor-pointer"
                     dateFormat="MM/dd/yyyy"
                   />
                   <FaCalendarAlt className="absolute left-5 top-1/2 -translate-y-1/2 text-red-500 pointer-events-none" />
@@ -303,7 +323,7 @@ const CreateDonationRequest = () => {
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r curp from-red-600 to-rose-600 text-white font-black py-5 rounded-[25px] shadow-xl hover:shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-3 text-xl uppercase italic tracking-widest"
+                className="w-full bg-gradient-to-r curp from-red-600 to-rose-600 text-white font-black py-5 rounded-[25px] shadow-xl hover:shadow-red-200 dark:shadow-none transition-all active:scale-95 flex items-center justify-center gap-3 text-xl uppercase italic tracking-widest"
               >
                 <FaPaperPlane className="text-lg" /> Post Blood Request
               </button>

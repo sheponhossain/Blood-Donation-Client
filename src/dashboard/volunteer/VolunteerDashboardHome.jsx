@@ -33,7 +33,7 @@ const VolunteerDashboardHome = () => {
   });
 
   useEffect(() => {
-    fetch('https://blood-donation-server-snowy-six.vercel.app/admin-stats')
+    fetch('https://blood-donation-server-nu-lyart.vercel.app/admin-stats')
       .then((res) => res.json())
       .then((data) => setDbStats(data))
       .catch((err) => console.error('Stats fetch error:', err));

@@ -11,8 +11,11 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import useAxiosSecure from '../Hooks/useAxiosSecure';
+import { useTheme } from '../context/ThemeContext';
 
 const BlogDetails = () => {
+  // eslint-disable-next-line no-unused-vars
+  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
   const { id } = useParams();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,12 +33,12 @@ const BlogDetails = () => {
       }
     };
     getBlogDetails();
-    window.scrollTo(0, 0); // পেজ লোড হলে একদম উপরে নিয়ে যাবে
+    window.scrollTo(0, 0);
   }, [id, axiosPublic]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FDFDFD]">
+      <div className="min-h-screen flex items-center justify-center bg-[#FDFDFD] dark:bg-slate-950 transition-colors duration-300">
         <div className="relative">
           <Loader2 className="w-12 h-12 text-red-600 animate-spin" />
           <div className="absolute inset-0 blur-xl bg-red-500/20 animate-pulse"></div>
@@ -46,19 +49,19 @@ const BlogDetails = () => {
 
   if (!blog) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFDFD] p-6 text-center">
-        <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mb-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFDFD] dark:bg-slate-950 p-6 text-center transition-colors duration-300">
+        <div className="w-24 h-24 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6">
           <MessageCircle size={40} className="text-red-500" />
         </div>
-        <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">
+        <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
           Post Not Found
         </h2>
-        <p className="text-slate-500 mb-8 max-w-sm">
+        <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm">
           The story you're looking for might have been moved or deleted.
         </p>
         <Link
           to="/blog"
-          className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm transition-transform hover:scale-105"
+          className="flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-red-600 text-white rounded-2xl font-bold text-sm transition-transform hover:scale-105"
         >
           <ArrowLeft size={18} /> Back to Blog
         </Link>
@@ -67,7 +70,7 @@ const BlogDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] selection:bg-red-100 selection:text-red-600">
+    <div className="min-h-screen bg-[#FDFDFD] dark:bg-slate-950 selection:bg-red-100 dark:selection:bg-red-900 selection:text-red-600 transition-colors duration-300">
       {/* Hero Header Section */}
       <section className="relative h-[60vh] md:h-[70vh] min-h-[450px] flex items-end">
         <div className="absolute inset-0 z-0">
@@ -76,7 +79,7 @@ const BlogDetails = () => {
             alt={blog.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 dark:from-slate-950 dark:via-slate-950/80 to-transparent"></div>
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-6 pb-16 w-full">
@@ -84,7 +87,7 @@ const BlogDetails = () => {
             to="/blog"
             className="inline-flex items-center gap-2 text-white/70 hover:text-red-400 transition-colors mb-8 group"
           >
-            <div className="p-2 bg-white/10 backdrop-blur-md rounded-full group-hover:-translate-x-1 transition-transform">
+            <div className="p-2 bg-white/10 dark:bg-black/20 backdrop-blur-md rounded-full group-hover:-translate-x-1 transition-transform">
               <ArrowLeft size={16} />
             </div>
             <span className="text-[11px] font-black uppercase tracking-[0.2em]">
@@ -92,7 +95,7 @@ const BlogDetails = () => {
             </span>
           </Link>
 
-          <span className="inline-block px-4 py-1.5 bg-red-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
+          <span className="inline-block px-4 py-1.5 bg-red-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest mb-6 shadow-lg shadow-red-600/20">
             {blog.category || 'Health'}
           </span>
 
@@ -102,7 +105,7 @@ const BlogDetails = () => {
 
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white">
+              <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white border border-white/10">
                 <User size={20} />
               </div>
               <div>
@@ -138,23 +141,23 @@ const BlogDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Body */}
           <div className="lg:col-span-8">
-            <article className="bg-white rounded-[2.5rem] p-8 md:p-14 shadow-xl shadow-slate-200/50 border border-slate-50">
-              <div className="prose prose-slate prose-lg max-w-none">
-                <p className="text-slate-700 leading-[2] text-lg font-medium whitespace-pre-line first-letter:text-5xl first-letter:font-black first-letter:text-red-600 first-letter:mr-3 first-letter:float-left">
+            <article className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-14 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-50 dark:border-slate-800 transition-colors">
+              <div className="prose prose-slate dark:prose-invert prose-lg max-w-none">
+                <p className="text-slate-700 dark:text-slate-300 leading-[2] text-lg font-medium whitespace-pre-line first-letter:text-5xl first-letter:font-black first-letter:text-red-600 dark:first-letter:text-red-500 first-letter:mr-3 first-letter:float-left">
                   {blog.content}
                 </p>
               </div>
 
-              <div className="mt-16 pt-10 border-t border-slate-100 flex flex-wrap items-center justify-between gap-6">
+              <div className="mt-16 pt-10 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                     Share:
                   </span>
                   <div className="flex gap-2">
-                    <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-red-600 hover:text-white transition-all">
+                    <button className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-red-600 hover:text-white transition-all">
                       <Share2 size={16} />
                     </button>
-                    <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-red-600 hover:text-white transition-all">
+                    <button className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-red-600 hover:text-white transition-all">
                       <Bookmark size={16} />
                     </button>
                   </div>
@@ -162,7 +165,7 @@ const BlogDetails = () => {
 
                 <Link
                   to="/blog"
-                  className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg active:scale-95"
+                  className="px-8 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg active:scale-95"
                 >
                   Explore More
                 </Link>
@@ -173,7 +176,7 @@ const BlogDetails = () => {
           {/* Sidebar */}
           <aside className="lg:col-span-4 space-y-8">
             {/* Quick Action Box */}
-            <div className="bg-red-600 rounded-[2rem] p-8 text-white relative overflow-hidden group">
+            <div className="bg-red-600 rounded-[2rem] p-8 text-white relative overflow-hidden group shadow-xl shadow-red-600/20">
               <div className="relative z-10">
                 <h4 className="text-xl font-black mb-4 leading-tight">
                   Become a Hero Today.
@@ -193,18 +196,18 @@ const BlogDetails = () => {
             </div>
 
             {/* Newsletter */}
-            <div className="bg-slate-900 rounded-[2rem] p-8 text-white">
+            <div className="bg-slate-900 dark:bg-slate-900 rounded-[2rem] p-8 text-white border border-transparent dark:border-slate-800">
               <h4 className="text-lg font-black mb-4 tracking-tight">
                 Stay Informed
               </h4>
-              <p className="text-slate-400 text-xs mb-6 leading-relaxed">
+              <p className="text-slate-400 dark:text-slate-500 text-xs mb-6 leading-relaxed">
                 Subscribe to get health tips and donor stories weekly.
               </p>
               <div className="space-y-3">
                 <input
                   type="email"
                   placeholder="Email Address"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                  className="w-full bg-white/5 dark:bg-slate-800 border border-white/10 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition-colors placeholder:text-slate-500"
                 />
                 <button className="w-full py-3 bg-red-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all">
                   Subscribe

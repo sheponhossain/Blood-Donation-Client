@@ -28,12 +28,19 @@ import Visa from '../../assets/BankLogo/visa-logo.png';
 import Mastercard from '../../assets/BankLogo/mastercard-icon.png';
 import DBBL from '../../assets/BankLogo/dutch-bangla-bank-logo.png';
 import IBBL from '../../assets/BankLogo/islami-bank-bangladesh-logo.png';
+import { useTheme } from '../../context/ThemeContext';
 
 const stripePromise = loadStripe(
   'pk_test_51SzahMBpKiUaBuAyZcfHACkmBGcvTkrV2sHx1hwqUUF1OzYqczFDnu6a978CbAVJWBZ4H0bahJTGMt673wZGXZRT00l1WDZ3h8'
 );
 
-const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
+const CheckoutForm = ({
+  amount,
+  selectedMethod,
+  onPaymentSuccess,
+  user,
+  theme,
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -45,7 +52,7 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
     if (amount >= 10 && cardMethods.includes(selectedMethod)) {
       axios
         .post(
-          'https://blood-donation-server-snowy-six.vercel.app/create-payment-intent',
+          'https://blood-donation-server-nu-lyart.vercel.app/create-payment-intent',
           { price: amount }
         )
         .then((res) => setClientSecret(res.data.clientSecret))
@@ -55,12 +62,25 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) return Swal.fire('Error', 'Please login first', 'error');
+    if (!user)
+      return Swal.fire({
+        title: 'Error',
+        text: 'Please login first',
+        icon: 'error',
+        background: theme === 'dark' ? '#1e293b' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#000',
+      });
     setProcessing(true);
 
     if (['bkash', 'nagad', 'rocket', 'upay'].includes(selectedMethod)) {
       if (!trxId) {
-        Swal.fire('Required', 'Enter Transaction ID', 'warning');
+        Swal.fire({
+          title: 'Required',
+          text: 'Enter Transaction ID',
+          icon: 'warning',
+          background: theme === 'dark' ? '#1e293b' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
+        });
         setProcessing(false);
         return;
       }
@@ -86,7 +106,13 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
     );
 
     if (error) {
-      Swal.fire('Failed', error.message, 'error');
+      Swal.fire({
+        title: 'Failed',
+        text: error.message,
+        icon: 'error',
+        background: theme === 'dark' ? '#1e293b' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#000',
+      });
       setProcessing(false);
     } else if (paymentIntent.status === 'succeeded') {
       onPaymentSuccess(Number(amount), selectedMethod, paymentIntent.id);
@@ -102,16 +128,24 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
             type="text"
             required
             placeholder="Transaction ID (e.g. 8N7X6W5Q)"
-            className="w-full px-4 py-3  bg-gray-50 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-all font-mono text-sm uppercase text-center"
+            className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-all font-mono text-sm uppercase text-center text-slate-900 dark:text-white"
             value={trxId}
             onChange={(e) => setTrxId(e.target.value)}
           />
         </div>
       ) : (
-        <div className="mb-4 p-3 border  border-gray-200 rounded-xl bg-gray-50">
+        <div className="mb-4 p-4 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800">
           <CardElement
             options={{
-              style: { base: { fontSize: '14px', color: '#424770' } },
+              style: {
+                base: {
+                  fontSize: '14px',
+                  color: theme === 'dark' ? '#fff' : '#424770',
+                  '::placeholder': {
+                    color: theme === 'dark' ? '#94a3b8' : '#aab7c4',
+                  },
+                },
+              },
             }}
           />
         </div>
@@ -120,7 +154,7 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
       <button
         type="submit"
         disabled={processing || !selectedMethod || amount < 10}
-        className="w-full cursor-pointer bg-red-600 text-white  font-bold py-3.5 rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-100 disabled:bg-gray-200 disabled:shadow-none text-sm tracking-wide uppercase"
+        className="w-full cursor-pointer bg-red-600 text-white font-bold py-3.5 rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-100 dark:shadow-none disabled:bg-gray-200 dark:disabled:bg-slate-800 disabled:text-gray-400 text-sm tracking-wide uppercase"
       >
         {processing ? 'Processing...' : `Confirm ৳${amount || 0}`}
       </button>
@@ -129,6 +163,7 @@ const CheckoutForm = ({ amount, selectedMethod, onPaymentSuccess, user }) => {
 };
 
 const FundingPage = () => {
+  const { theme } = useTheme();
   const { user } = useContext(AuthContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [amount, setAmount] = useState('');
@@ -151,7 +186,7 @@ const FundingPage = () => {
 
   const fetchFundings = () =>
     axios
-      .get('https://blood-donation-server-snowy-six.vercel.app/payments')
+      .get('https://blood-donation-server-nu-lyart.vercel.app/payments')
       .then((res) => setFundings(res.data));
   useEffect(() => {
     fetchFundings();
@@ -170,7 +205,7 @@ const FundingPage = () => {
     };
     try {
       const res = await axios.post(
-        'https://blood-donation-server-snowy-six.vercel.app/payments',
+        'https://blood-donation-server-nu-lyart.vercel.app/payments',
         paymentData
       );
       if (res.data.insertedId) {
@@ -184,6 +219,8 @@ const FundingPage = () => {
           text: 'Contribution successful.',
           confirmButtonText: 'OK',
           confirmButtonColor: '#dc2626',
+          background: theme === 'dark' ? '#1e293b' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
         });
       }
     } catch (err) {
@@ -192,10 +229,9 @@ const FundingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 pb-20 font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-white pb-20 font-sans transition-colors duration-300">
       {/* Hero Section */}
-      <div className="relative bg-white px-6 py-28 text-center border-b border-slate-100 overflow-hidden">
-        {/* Lottie Animation in Background */}
+      <div className="relative bg-white dark:bg-slate-900 px-6 py-28 text-center border-b border-slate-100 dark:border-slate-800 overflow-hidden transition-colors">
         <div className="absolute inset-0 flex items-center justify-center opacity-70 pointer-events-none">
           <div className="w-full max-w-9/12 mb-10">
             <DotLottieReact
@@ -206,12 +242,12 @@ const FundingPage = () => {
           </div>
         </div>
 
-        {/* Hero Content */}
         <div className="relative z-10">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
-            Support Our <span className="text-red-600">Mission</span>
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight dark:text-white">
+            Support Our{' '}
+            <span className="text-red-600 dark:text-red-500">Mission</span>
           </h1>
-          <p className="text-slate-500 text-sm md:text-base max-w-md mx-auto mb-8 font-medium">
+          <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-md mx-auto mb-8 font-medium">
             Your contribution helps us save lives through our blood network.
           </p>
           <button
@@ -223,9 +259,8 @@ const FundingPage = () => {
         </div>
       </div>
 
-      {/* Main Container for Stats & Table */}
       <div className="max-w-5xl mx-auto px-6 relative z-20">
-        {/* Stat Cards - Positioned to overlap slightly with Hero */}
+        {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 -mt-12 mb-12">
           <StatCard
             label="Total Raised"
@@ -236,33 +271,33 @@ const FundingPage = () => {
         </div>
 
         {/* Table Section */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="px-8 py-5 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors">
+          <div className="px-8 py-5 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/50">
+            <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
               Donor Recognition
             </h3>
-            <span className="text-[10px] font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">
+            <span className="text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded-full">
               Live Updates
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                 {fundings.map((f, i) => (
                   <tr
                     key={i}
-                    className="hover:bg-slate-50/80 transition-all group"
+                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all group"
                   >
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm border border-white shadow-sm shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-sm border border-white dark:border-slate-600 shadow-sm shrink-0">
                           {f.userName?.charAt(0) || 'D'}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-800 text-sm tracking-tight group-hover:text-red-600 transition-colors">
+                          <div className="font-bold text-slate-800 dark:text-slate-200 text-sm tracking-tight group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                             {f.userName}
                           </div>
-                          <div className="text-[11px] text-slate-400 font-medium lowercase">
+                          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium lowercase">
                             {f.userEmail}
                           </div>
                         </div>
@@ -271,10 +306,10 @@ const FundingPage = () => {
 
                     <td className="px-8 py-5">
                       <div className="flex flex-col">
-                        <span className="text-red-600 font-black text-lg tracking-tighter">
+                        <span className="text-red-600 dark:text-red-500 font-black text-lg tracking-tighter">
                           ৳{f.amount}
                         </span>
-                        <span className="text-[9px] text-slate-300 uppercase font-bold tracking-widest">
+                        <span className="text-[9px] text-slate-300 dark:text-slate-600 uppercase font-bold tracking-widest">
                           Contribution
                         </span>
                       </div>
@@ -282,21 +317,21 @@ const FundingPage = () => {
 
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-2">
-                        <div className="p-2 bg-slate-50 rounded-xl border border-slate-100 group-hover:border-red-100 group-hover:bg-white transition-all">
+                        <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 group-hover:border-red-100 dark:group-hover:border-red-900 group-hover:bg-white dark:group-hover:bg-slate-700 transition-all">
                           <img
                             src={allLogos[f.method]}
-                            className="h-5 w-auto object-contain"
+                            className="h-5 w-auto object-contain brightness-100 dark:brightness-90"
                             alt={f.method}
                           />
                         </div>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter hidden sm:block">
+                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter hidden sm:block">
                           {f.method}
                         </span>
                       </div>
                     </td>
 
                     <td className="px-8 py-5 text-right">
-                      <div className="text-slate-400 font-bold text-[10px] bg-slate-50 px-3 py-1.5 rounded-lg inline-block group-hover:bg-white transition-all">
+                      <div className="text-slate-400 dark:text-slate-500 font-bold text-[10px] bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg inline-block group-hover:bg-white dark:group-hover:bg-slate-700 transition-all">
                         {new Date(f.date).toLocaleDateString('en-GB', {
                           day: '2-digit',
                           month: 'short',
@@ -312,28 +347,28 @@ const FundingPage = () => {
         </div>
       </div>
 
-      {/* Modal Section (Unchanged) */}
+      {/* Modal Section */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px]"
             onClick={() => setIsModalOpen(false)}
           ></div>
-          <div className="relative bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+          <div className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800">
+            <div className="p-6 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/50">
               <div className="flex items-center gap-3">
                 <img
                   src={user?.photoURL || 'https://via.placeholder.com/40'}
-                  className="w-8 h-8 rounded-full border border-red-100"
+                  className="w-8 h-8 rounded-full border border-red-100 dark:border-red-900"
                   alt=""
                 />
-                <h3 className="font-bold text-slate-800 tracking-tight">
+                <h3 className="font-bold text-slate-800 dark:text-white tracking-tight">
                   Secure Donation
                 </h3>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full transition-all"
+                className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-600 rounded-full transition-all"
               >
                 <X size={18} />
               </button>
@@ -341,7 +376,7 @@ const FundingPage = () => {
 
             <div className="p-7">
               <div className="mb-6">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">
                   Amount (BDT)
                 </div>
                 <input
@@ -349,7 +384,7 @@ const FundingPage = () => {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-red-500 outline-none font-bold text-3xl transition-all shadow-inner"
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl focus:border-red-500 outline-none font-bold text-3xl text-slate-900 dark:text-white transition-all shadow-inner"
                 />
               </div>
 
@@ -360,6 +395,7 @@ const FundingPage = () => {
                   methods={mobileMethods}
                   selected={selectedMethod}
                   onSelect={setSelectedMethod}
+                  theme={theme}
                 />
                 <MethodGrid
                   title="Banking & Cards"
@@ -367,6 +403,7 @@ const FundingPage = () => {
                   methods={bankingMethods}
                   selected={selectedMethod}
                   onSelect={setSelectedMethod}
+                  theme={theme}
                 />
               </div>
 
@@ -376,10 +413,11 @@ const FundingPage = () => {
                   selectedMethod={selectedMethod}
                   onPaymentSuccess={handlePaymentSuccess}
                   user={user}
+                  theme={theme}
                 />
               </Elements>
 
-              <div className="mt-6 flex items-center justify-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+              <div className="mt-6 flex items-center justify-center gap-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                 <ShieldCheck size={12} className="text-green-500" /> SSL Secure
                 Payment
               </div>
@@ -391,11 +429,12 @@ const FundingPage = () => {
   );
 };
 
-// --- Sub-components (Unchanged) ---
+// --- Sub-components ---
 
-const MethodGrid = ({ title, icon, methods, selected, onSelect }) => (
+// eslint-disable-next-line no-unused-vars
+const MethodGrid = ({ title, icon, methods, selected, onSelect, theme }) => (
   <div>
-    <div className="flex items-center gap-1.5 text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-3 ml-1">
+    <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 text-[9px] font-bold uppercase tracking-wider mb-3 ml-1">
       {icon} {title}
     </div>
     <div className="grid grid-cols-4 gap-2.5">
@@ -403,17 +442,21 @@ const MethodGrid = ({ title, icon, methods, selected, onSelect }) => (
         <button
           key={id}
           onClick={() => onSelect(id)}
-          className={`relative aspect-square p-2.5 border rounded-xl transition-all flex items-center justify-center bg-white ${
+          className={`relative aspect-square p-2.5 border rounded-xl transition-all flex items-center justify-center bg-white dark:bg-slate-800 ${
             selected === id
-              ? 'border-red-500 bg-red-50/30 ring-2 ring-red-500/10'
-              : 'border-slate-100 hover:border-slate-200'
+              ? 'border-red-500 bg-red-50/30 dark:bg-red-900/20 ring-2 ring-red-500/10'
+              : 'border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600'
           }`}
         >
-          <img src={img} className="h-full w-full object-contain" alt={id} />
+          <img
+            src={img}
+            className="h-full w-full object-contain brightness-100 dark:brightness-90"
+            alt={id}
+          />
           {selected === id && (
             <CheckCircle2
               size={12}
-              className="absolute -top-1.5 -right-1.5 text-red-600 bg-white rounded-full"
+              className="absolute -top-1.5 -right-1.5 text-red-600 bg-white dark:bg-slate-900 rounded-full"
             />
           )}
         </button>
@@ -423,11 +466,11 @@ const MethodGrid = ({ title, icon, methods, selected, onSelect }) => (
 );
 
 const StatCard = ({ label, value }) => (
-  <div className="bg-white p-7 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center hover:translate-y-[-4px] transition-all duration-300">
-    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">
+  <div className="bg-white dark:bg-slate-900 p-7 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center hover:translate-y-[-4px] transition-all duration-300">
+    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">
       {label}
     </p>
-    <h3 className="text-2xl font-extrabold text-slate-800 tracking-tight lowercase">
+    <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight lowercase">
       {value}
     </h3>
   </div>
