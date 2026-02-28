@@ -27,6 +27,10 @@ import PrivateRoute from './PrivateRoute';
 import Blog from '../pages/Blog';
 import NotFound from '../components/shared/NotFound';
 import BlogDetails from '../pages/BlogDetails';
+import Gallery from '../pages/Gallery';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import TermsOfService from '../pages/TermsOfService';
+import CopyrightNotice from '../pages/CopyrightNotice';
 
 export const router = createBrowserRouter([
   {
@@ -61,6 +65,14 @@ export const router = createBrowserRouter([
       {
         path: 'search',
         element: <SearchPage />,
+      },
+      {
+        path: 'Gallery',
+        element: (
+          <PrivateRoute>
+            <Gallery />
+          </PrivateRoute>
+        ),
       },
       {
         path: 'banner',
@@ -146,5 +158,17 @@ export const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: 'PrivacyPolicy',
+    element: <PrivacyPolicy />,
+  },
+  {
+    path: 'TermsOfService',
+    element: <TermsOfService />,
+  },
+  {
+    path: 'CopyrightNotice',
+    element: <CopyrightNotice />,
   },
 ]);

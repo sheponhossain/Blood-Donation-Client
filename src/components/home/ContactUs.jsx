@@ -1,4 +1,6 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import {
   Mail,
   Phone,
@@ -7,152 +9,173 @@ import {
   MessageCircle,
   Clock,
   ArrowRight,
+  Globe,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useTheme } from '../../context/ThemeContext';
 
 const ContactUs = () => {
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট ব্যবহার
+  const { theme } = useTheme();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     Swal.fire({
-      title: 'Message Received!',
-      text: 'Our team will contact you within 24 hours.',
+      title: 'Success!',
+      text: 'Message sent successfully. We will get back to you soon!',
       icon: 'success',
       confirmButtonColor: '#ef4444',
-      background: theme === 'dark' ? '#0f172a' : '#fff', // ডার্ক মোডে অ্যালার্ট ব্যাকগ্রাউন্ড
+      background: theme === 'dark' ? '#1e293b' : '#fff',
       color: theme === 'dark' ? '#fff' : '#000',
       customClass: { popup: 'rounded-[30px]' },
     });
   };
 
   return (
-    // ৩. ডার্ক মোড সাপোর্ট সহ মেইন সেকশন
-    <section className="py-24 bg-white dark:bg-slate-950 transition-colors duration-300">
-      <div className="container mx-auto px-6 max-w-6xl">
-        <div className="bg-slate-900 dark:bg-slate-900 rounded-[50px] overflow-hidden shadow-2xl flex flex-col lg:flex-row border dark:border-slate-800">
-          {/* Left Panel: Contact Info (সর্বদাই রঙিন/ডার্ক থাকবে আপনার ডিজাইন অনুযায়ী) */}
-          <div className="lg:w-2/5 bg-gradient-to-br from-red-600 to-rose-700 dark:from-red-900 dark:to-slate-900 p-12 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-black/20 rounded-full blur-3xl"></div>
+    <section className="py-24 bg-white dark:bg-slate-950 transition-colors duration-500 overflow-hidden">
+      <div className="container mx-auto px-6 max-w-7xl">
+        {/* --- Section Header --- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-20"
+        >
+          <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">
+            Contact <span className="text-red-600">Us</span>
+          </h2>
+          <p className="mt-4 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.3em] text-xs md:text-sm">
+            Get in touch for life-saving support
+          </p>
+        </motion.div>
 
-            <div className="relative z-10 h-full flex flex-col justify-between">
-              <div>
-                <h2 className="text-4xl font-black tracking-tighter mb-6 leading-tight uppercase">
-                  Let's save <br /> lives together.
-                </h2>
-                <p className="text-red-100 text-sm font-medium leading-relaxed opacity-80 max-w-[280px]">
-                  Have questions about blood donation or need emergency support?
-                  We're here for you 24/7.
-                </p>
-              </div>
+        <div className="flex flex-col lg:flex-row gap-12 items-stretch">
+          {/* --- Left: Contact Info Cards --- */}
+          <div className="lg:w-1/3 space-y-6">
+            <ContactCard
+              icon={<Phone className="text-blue-500" />}
+              title="Emergency Call"
+              info="+880 1234 567 890"
+              delay={0.1}
+            />
+            <ContactCard
+              icon={<Mail className="text-red-500" />}
+              title="Official Email"
+              info="support@bloodhero.com"
+              delay={0.2}
+            />
+            <ContactCard
+              icon={<MapPin className="text-emerald-500" />}
+              title="Main Office"
+              info="Dhaka, Bangladesh"
+              delay={0.3}
+            />
 
-              <div className="space-y-8 my-12">
-                <ContactLink
-                  icon={<Phone size={20} />}
-                  label="Emergency Call"
-                  value="+880 1234 567 890"
-                />
-                <ContactLink
-                  icon={<Mail size={20} />}
-                  label="Support Email"
-                  value="hello@Blood Donation.com"
-                />
-                <ContactLink
-                  icon={<Clock size={20} />}
-                  label="Response Time"
-                  value="Within 24 Hours"
-                />
+            {/* Live Status Animation */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              className="p-6 rounded-[2rem] bg-slate-900 text-white flex items-center gap-4 border border-white/5 shadow-2xl"
+            >
+              <div className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
               </div>
-
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
-                  <MessageCircle size={18} />
-                </div>
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
-                  <MapPin size={18} />
-                </div>
-              </div>
-            </div>
+              <p className="text-xs font-black uppercase tracking-widest italic">
+                Live Support Available Now
+              </p>
+            </motion.div>
           </div>
 
-          {/* Right Panel: Form (ডার্ক মোডে এটি স্লেট কালার হবে) */}
-          <div className="lg:w-3/5 bg-white dark:bg-slate-900 p-12 transition-colors duration-300">
-            <div className="mb-10">
-              <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight mb-2 uppercase">
-                Send a Message
-              </h3>
-              <div className="h-1 w-10 bg-red-600 rounded-full"></div>
-            </div>
-
+          {/* --- Right: Interactive Form --- */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="lg:w-2/3 bg-slate-50 dark:bg-slate-900 rounded-[3rem] md:rounded-[4rem] p-8 md:p-16 border border-slate-100 dark:border-slate-800 relative"
+          >
             <form
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10"
             >
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
-                  Full Name
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Your Name
                 </label>
                 <input
                   type="text"
-                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-transparent border-2 focus:border-red-100 dark:focus:border-red-900/50 focus:bg-white dark:focus:bg-slate-800 rounded-2xl transition-all outline-none font-bold text-slate-700 dark:text-slate-200"
+                  required
+                  className="w-full px-8 py-5 bg-white dark:bg-slate-800 border-2 border-transparent focus:border-red-600 rounded-[25px] outline-none font-bold text-slate-700 dark:text-white transition-all shadow-sm"
                   placeholder="John Doe"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
-                  Email
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Email Address
                 </label>
                 <input
                   type="email"
-                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-transparent border-2 focus:border-red-100 dark:focus:border-red-900/50 focus:bg-white dark:focus:bg-slate-800 rounded-2xl transition-all outline-none font-bold text-slate-700 dark:text-slate-200"
+                  required
+                  className="w-full px-8 py-5 bg-white dark:bg-slate-800 border-2 border-transparent focus:border-red-600 rounded-[25px] outline-none font-bold text-slate-700 dark:text-white transition-all shadow-sm"
                   placeholder="john@example.com"
                 />
               </div>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
-                  Your Message
+              <div className="md:col-span-2 space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Message
                 </label>
                 <textarea
-                  rows="4"
-                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-transparent border-2 focus:border-red-100 dark:focus:border-red-900/50 focus:bg-white dark:focus:bg-slate-800 rounded-2xl transition-all outline-none font-bold text-slate-700 dark:text-slate-200 resize-none"
-                  placeholder="Tell us how we can help..."
+                  rows="5"
+                  required
+                  className="w-full px-8 py-6 bg-white dark:bg-slate-800 border-2 border-transparent focus:border-red-600 rounded-[30px] outline-none font-bold text-slate-700 dark:text-white transition-all shadow-sm resize-none"
+                  placeholder="How can we help you?"
                 ></textarea>
               </div>
 
-              <div className="md:col-span-2 pt-4">
-                <button
-                  type="submit"
-                  className="group w-full cursor-pointer md:w-auto px-12 py-5 bg-slate-900 dark:bg-red-600 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-red-600 dark:hover:bg-red-700 transition-all shadow-xl shadow-slate-200 dark:shadow-none flex items-center justify-center gap-3"
-                >
-                  Submit Message{' '}
-                  <ArrowRight
-                    size={16}
-                    className="group-hover:translate-x-1 transition-transform"
-                  />
-                </button>
-              </div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="md:col-span-2 w-full md:w-auto px-12 py-5 bg-slate-900 dark:bg-red-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl flex items-center justify-center gap-3 transition-colors hover:bg-red-600 dark:hover:bg-white dark:hover:text-slate-900"
+              >
+                Send Message <ArrowRight size={18} />
+              </motion.button>
             </form>
-          </div>
+
+            {/* Background Accent Animation */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+              className="absolute -top-10 -right-10 w-40 h-40 bg-red-600/5 rounded-full blur-3xl pointer-events-none"
+            />
+          </motion.div>
         </div>
       </div>
     </section>
   );
 };
 
-const ContactLink = ({ icon, label, value }) => (
-  <div className="flex items-center gap-5 group">
-    <div className="p-3 bg-white/10 rounded-xl group-hover:bg-white group-hover:text-red-600 transition-all">
+// Helper Component for Info Cards
+const ContactCard = ({ icon, title, info, delay }) => (
+  <motion.div
+    initial={{ opacity: 0, x: -30 }}
+    whileInView={{ opacity: 1, x: 0 }}
+    transition={{ delay }}
+    viewport={{ once: true }}
+    whileHover={{ y: -5 }}
+    className="p-8 bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex items-center gap-6 shadow-sm hover:shadow-xl transition-all"
+  >
+    <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center shadow-inner">
       {icon}
     </div>
     <div>
-      <p className="text-[9px] font-bold text-red-200 uppercase tracking-widest leading-none mb-1">
-        {label}
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+        {title}
       </p>
-      <p className="text-sm font-bold tracking-tight">{value}</p>
+      <p className="text-sm md:text-base font-bold text-slate-900 dark:text-slate-200 tracking-tight">
+        {info}
+      </p>
     </div>
-  </div>
+  </motion.div>
 );
 
 export default ContactUs;

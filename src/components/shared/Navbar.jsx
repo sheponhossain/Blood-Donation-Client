@@ -22,7 +22,7 @@ const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme(); // গ্লোবাল থিম লজিক
 
-  const navLinks = [
+  const publicLinks = [
     { name: 'Home', path: '/' },
     { name: 'Blood Requests', path: '/blood-requests' },
     { name: 'Funding', path: '/funding' },
@@ -30,7 +30,10 @@ const Navbar = () => {
     { name: 'Blog', path: '/blog' },
   ];
 
-  // ডার্ক মোড সাপোর্ট সহ স্টাইল
+  const navLinks = user
+    ? [...publicLinks, { name: 'Gallery', path: '/Gallery' }]
+    : publicLinks;
+
   const activeStyle =
     'text-red-600 dark:text-red-400 font-bold border-b-2 border-red-600 pb-1 transition-all';
   const normalStyle =

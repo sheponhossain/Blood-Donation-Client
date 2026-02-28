@@ -38,19 +38,38 @@ const BloodRequests = () => {
 
   if (loading) {
     return (
-      // ডার্ক মোড সাপোর্ট সহ লোডিং স্ক্রিন
-      <div className="min-h-[60vh] flex items-center justify-center bg-white dark:bg-slate-950 transition-colors">
-        <div className="flex flex-col items-center">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-red-100 dark:border-slate-800 border-t-red-600 rounded-full animate-spin"></div>
-            <Droplets
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-red-600"
-              size={24}
-            />
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 py-16 px-4 transition-colors">
+        <div className="max-w-6xl mx-auto">
+          {/* Skeleton Header */}
+          <div className="flex flex-col items-center mb-16 space-y-4">
+            <div className="h-6 w-32 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
+            <div className="h-12 w-3/4 md:w-1/2 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse"></div>
+            <div className="h-4 w-2/3 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse"></div>
           </div>
-          <p className="mt-4 font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[10px]">
-            Fetching Live Requests
-          </p>
+
+          {/* Skeleton Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div
+                key={n}
+                className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 space-y-6"
+              >
+                <div className="flex justify-between">
+                  <div className="space-y-3 w-2/3">
+                    <div className="h-3 w-20 bg-slate-200 dark:bg-slate-800 rounded animate-pulse"></div>
+                    <div className="h-6 w-full bg-slate-200 dark:bg-slate-800 rounded animate-pulse"></div>
+                  </div>
+                  <div className="w-14 h-14 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse"></div>
+                </div>
+                <div className="h-16 w-full bg-slate-100 dark:bg-slate-800/50 rounded-2xl animate-pulse"></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-12 bg-slate-100 dark:bg-slate-800/50 rounded-2xl animate-pulse"></div>
+                  <div className="h-12 bg-slate-100 dark:bg-slate-800/50 rounded-2xl animate-pulse"></div>
+                </div>
+                <div className="h-14 w-full bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse"></div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

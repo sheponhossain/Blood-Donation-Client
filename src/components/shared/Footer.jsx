@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import {
   FaFacebook,
   FaTwitter,
@@ -16,7 +18,13 @@ const Footer = () => {
   const { theme } = useTheme();
 
   return (
-    <footer className="bg-gray-900 dark:bg-[#020617] text-gray-300 mt-20 border-t border-gray-800 dark:border-slate-800 transition-colors duration-300">
+    <motion.footer
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className="bg-gray-900 dark:bg-[#020617] text-gray-300 mt-20 border-t border-gray-800 dark:border-slate-800 transition-colors duration-300"
+    >
       <div className="w-full mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Logo & Info */}
@@ -33,19 +41,19 @@ const Footer = () => {
             </p>
             <div className="flex gap-5 text-xl pt-2">
               <a
-                href="#"
+                href="https://www.facebook.com/"
                 className="hover:text-red-500 transition-all duration-300 transform hover:scale-110"
               >
                 <FaFacebook />
               </a>
               <a
-                href="#"
+                href="https://x.com/"
                 className="hover:text-red-500 transition-all duration-300 transform hover:scale-110"
               >
                 <FaTwitter />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/"
                 className="hover:text-red-500 transition-all duration-300 transform hover:scale-110"
               >
                 <FaInstagram />
@@ -81,7 +89,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/donation-requests"
+                    to="/blood-requests"
                     className="hover:text-red-500 hover:pl-2 transition-all duration-300 block"
                   >
                     Donation Requests
@@ -159,18 +167,21 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 dark:border-slate-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[13px] text-gray-500 dark:text-slate-500">
-          <p>
+          <a
+            href="/CopyrightNotice"
+            className="hover:text-gray-300 dark:hover:text-slate-300 transition-colors"
+          >
             © {new Date().getFullYear()} BloodDonation. All Rights Reserved.
-          </p>
+          </a>
           <div className="flex gap-6">
             <a
-              href="#"
+              href="/PrivacyPolicy"
               className="hover:text-gray-300 dark:hover:text-slate-300 transition-colors"
             >
               Privacy Policy
             </a>
             <a
-              href="#"
+              href="/TermsOfService"
               className="hover:text-gray-300 dark:hover:text-slate-300 transition-colors"
             >
               Terms of Service
@@ -178,7 +189,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 };
 
