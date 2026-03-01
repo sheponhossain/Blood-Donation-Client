@@ -3,7 +3,7 @@
 A comprehensive and user-friendly platform designed to connect blood donors with recipients. This application facilitates blood donation activities, donor management, and organizational funding with role-based access control.
 
 ## 🌐 Live Site
-**Live URL:** [Insert Your Live Link Here]
+**Live URL:** [(https://blood-donation-11.web.app/)]
 
 ---
 
@@ -70,5 +70,19 @@ The Blood Donation Application aims to create a seamless experience for finding 
 ## ⚙️ Installation & Setup
 
 1. **Clone the repository:**
-   ```bash
-   git clone [your-client-repo-link]
+**Live Website URL** `https://blood-donation-11.web.app`
+
+**GitHub Repository Link** 
+
+**Frontend source code** `https://github.com/sheponhossain/Blood-Donation-Client.git`
+**Backend source code**`https://github.com/sheponhossain/Blood-Donation-Server.git`
+
+**Demo Credentials**
+
+**User:** `Donor`
+**Email:**`donor@gmail.com`
+**Password:** `123456`
+
+**Admin:** `Admin`
+**Email:** `shepon@gmail.com`
+**Password:** `123456`
