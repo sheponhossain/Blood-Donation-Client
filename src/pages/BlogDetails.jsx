@@ -15,7 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const BlogDetails = () => {
   // eslint-disable-next-line no-unused-vars
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
+  const { theme } = useTheme();
   const { id } = useParams();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);

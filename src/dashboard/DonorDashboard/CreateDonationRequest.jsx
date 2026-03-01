@@ -18,7 +18,7 @@ import useAxiosSecure from '../../Hooks/useAxiosSecure';
 import { useTheme } from '../../context/ThemeContext';
 
 const CreateDonationRequest = () => {
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
+  const { theme } = useTheme();
   const { user, loading } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 

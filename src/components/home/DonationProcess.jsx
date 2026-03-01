@@ -43,11 +43,9 @@ const DonationProcess = () => {
         </p>
       </div>
 
-      {/* --- Responsive Steps Grid --- */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-12 gap-x-4 md:gap-x-8">
         {steps.map((step, idx) => (
           <div key={idx} className="flex flex-col items-center group">
-            {/* Image Container - মোবাইলের জন্য সাইজ অ্যাডজাস্ট করা হয়েছে */}
             <div className="relative mb-6 md:mb-8 w-full max-w-[160px] sm:max-w-[200px] md:max-w-[240px] lg:max-w-[260px] aspect-square">
               {/* Decorative Frame */}
               <div

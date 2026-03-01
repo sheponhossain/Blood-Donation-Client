@@ -13,7 +13,7 @@ const Welcome = ({
   showButton = true,
 }) => {
   // eslint-disable-next-line no-unused-vars
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
+  const { theme } = useTheme();
   const { user: authUser } = useContext(AuthContext);
   const [dbUser, setDbUser] = useState(null);
 

@@ -32,9 +32,7 @@ const Features = () => {
   ];
 
   return (
-    // ৩. ডার্ক মোড সাপোর্ট সহ সেকশন কন্টেইনার
     <section className="py-20 bg-[#fffafa] dark:bg-slate-950 relative overflow-hidden transition-colors duration-300">
-      {/* Background Decorative Elements - ডার্ক মোডে অপাসিটি কমানো হয়েছে */}
       <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-red-50 dark:bg-red-900/10 rounded-full blur-3xl opacity-50"></div>
       <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-rose-50 dark:bg-rose-900/10 rounded-full blur-3xl opacity-50"></div>
 
@@ -67,12 +65,10 @@ const Features = () => {
           </div>
         </div>
 
-        {/* Feature Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {coreFeatures.map((f, i) => (
             <div
               key={i}
-              // কার্ডে ডার্ক মোড ক্লাস যোগ করা হয়েছে
               className="relative p-10 bg-white dark:bg-slate-900 rounded-[40px] border border-red-50 dark:border-slate-800 hover:border-red-100 dark:hover:border-slate-700 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_60px_-15px_rgba(225,29,72,0.15)] transition-all duration-500 group"
             >
               <div
@@ -107,7 +103,6 @@ const Features = () => {
   );
 };
 
-// Stat Component - ডার্ক মোড সাপোর্ট সহ
 const StatBox = ({ count, label }) => (
   <div className="p-6 bg-white dark:bg-slate-900 border border-red-50 dark:border-slate-800 rounded-3xl text-center shadow-sm transition-colors">
     <h4 className="text-2xl font-black text-red-600 dark:text-red-500 tracking-tighter">

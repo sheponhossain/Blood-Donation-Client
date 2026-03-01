@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
 import { useTheme } from '../../context/ThemeContext';
 
 const AllUsers = () => {
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
+  const { theme } = useTheme();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');

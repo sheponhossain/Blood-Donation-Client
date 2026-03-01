@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import useAxiosSecure from '../../Hooks/useAxiosSecure';
-import { useTheme } from '../../context/ThemeContext'; // ১. থিম কন্টেক্সট ইমপোর্ট
+import { useTheme } from '../../context/ThemeContext';
 
 const ContentManagement = () => {
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
+  const { theme } = useTheme();
   const axiosSecure = useAxiosSecure();
   const [blogs, setBlogs] = useState([]);
   const [showModal, setShowModal] = useState(false);

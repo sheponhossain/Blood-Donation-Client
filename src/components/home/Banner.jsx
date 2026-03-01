@@ -4,7 +4,6 @@ import BloodDonationBG from '../../assets/BloodDonationBG.mp4';
 
 const Banner = () => {
   return (
-    // h-[60vh] lg:h-[70vh] দিয়ে হাইট ৬০% থেকে ৭০% এর মধ্যে রাখা হয়েছে
     <div className="relative w-full h-[60vh] lg:h-[70vh] min-h-[450px] max-h-[750px] flex items-center overflow-hidden bg-black">
       {/* --- Video Background --- */}
       <div className="absolute inset-0 z-0">

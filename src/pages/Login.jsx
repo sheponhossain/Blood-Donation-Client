@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../providers/AuthProvider';
 import { useTheme } from '../context/ThemeContext';
-import { ShieldCheck } from 'lucide-react'; // আইকন ব্যবহারের জন্য
+import { ShieldCheck } from 'lucide-react';
 
 const Login = () => {
   // eslint-disable-next-line no-unused-vars
@@ -13,7 +13,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    setValue, // ফিল্ড ভ্যালু সেট করার জন্য
+    setValue,
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
@@ -26,8 +26,6 @@ const Login = () => {
       .then((result) => {
         const user = result.user;
         const userInfo = { email: user.email };
-
-        // JWT টোকেন জেনারেট করা
         fetch('https://blood-donation-server-nu-lyart.vercel.app/jwt', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -56,8 +54,8 @@ const Login = () => {
 
   // --- Demo Login Handler ---
   const handleDemoLogin = () => {
-    const demoEmail = 'admin@hero.com'; // আপনার ডেমো ইমেইল
-    const demoPassword = 'password123'; // আপনার ডেমো পাসওয়ার্ড
+    const demoEmail = 'admin@hero.com';
+    const demoPassword = 'password123';
 
     setValue('email', demoEmail);
     setValue('password', demoPassword);

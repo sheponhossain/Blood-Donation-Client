@@ -20,7 +20,7 @@ import Welcome from '../../components/Welcome/Welcome';
 import { useTheme } from '../../context/ThemeContext';
 
 const DonorDashboardHome = () => {
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
+  const { theme } = useTheme();
   const { user: authUser } = useContext(AuthContext);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);

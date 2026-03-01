@@ -71,9 +71,7 @@ const SearchPage = () => {
   };
 
   return (
-    // bg-white dark:bg-slate-950 যোগ করা হয়েছে গ্লোবাল ব্যাকগ্রাউন্ডের জন্য
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 pb-20 font-sans transition-colors duration-300">
-      {/* Search Header */}
       <div className="bg-gradient-to-r from-red-600 to-red-800 dark:from-red-900 dark:to-slate-900 py-20 px-6 text-center text-white print:hidden relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -93,7 +91,6 @@ const SearchPage = () => {
 
       {/* Filter Section */}
       <div className="max-w-6xl mx-auto -mt-12 px-4 relative z-10 print:hidden">
-        {/* dark:bg-slate-900 এবং dark:border-slate-800 যোগ করা হয়েছে */}
         <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-[2rem] shadow-2xl p-8 border border-white/50 dark:border-slate-800">
           <div className="flex items-center gap-2 mb-6 text-red-600 dark:text-red-400">
             <Filter size={20} strokeWidth={3} />

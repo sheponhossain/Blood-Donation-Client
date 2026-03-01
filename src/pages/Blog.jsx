@@ -31,7 +31,6 @@ const Blog = () => {
 
   if (loading) {
     return (
-      // ডার্ক মোডে লোডার ব্যাকগ্রাউন্ড এডজাস্ট করা হয়েছে
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 transition-colors">
         <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
       </div>
@@ -39,9 +38,7 @@ const Blog = () => {
   }
 
   return (
-    // ৩. ডার্ক মোড সাপোর্ট সহ মেইন কন্টেইনার
     <div className="min-h-screen bg-[#FDFDFD] dark:bg-slate-950 pb-20 transition-colors duration-300">
-      {/* Header Section (ডার্ক মোডে আরও একটু সলিড লুক দেওয়া হয়েছে) */}
       <section className="bg-slate-900 dark:bg-slate-900/50 pt-32 pb-20 px-6 border-b dark:border-slate-800">
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full mb-6">
@@ -74,7 +71,6 @@ const Blog = () => {
             {blogs.map((blog) => (
               <article
                 key={blog._id}
-                // কার্ডে dark:bg-slate-900 এবং dark:border-slate-800 যোগ করা হয়েছে
                 className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:shadow-red-200/20 dark:hover:shadow-red-900/10 transition-all duration-500 group overflow-hidden flex flex-col"
               >
                 {/* Image Thumbnail */}
@@ -124,7 +120,6 @@ const Blog = () => {
           </div>
         )}
 
-        {/* Call to Action Section (ডার্ক মোডেও এটি লাল থাকবে কারণ এটি ব্র্যান্ড কালার) */}
         <div className="mt-24 bg-red-600 dark:bg-red-700 rounded-[3.5rem] p-12 text-center text-white relative overflow-hidden group">
           <div className="relative z-10">
             <Heart size={48} className="mx-auto mb-6 animate-pulse" />

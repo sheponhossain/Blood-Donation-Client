@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 const Funding = () => {
   // eslint-disable-next-line no-unused-vars
-  const { theme } = useTheme(); // ২. গ্লোবাল থিম স্টেট
+  const { theme } = useTheme();
   const [fundings, setFundings] = useState([]);
   const [loading, setLoading] = useState(true);
 

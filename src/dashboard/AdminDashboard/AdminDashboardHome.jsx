@@ -21,7 +21,7 @@ import Welcome from '../../components/Welcome/Welcome';
 import { useTheme } from '../../context/ThemeContext';
 
 const AdminDashboardHome = () => {
-  const { theme } = useTheme(); // থিম লজিক
+  const { theme } = useTheme();
   const [period, setPeriod] = useState('Daily');
   const [dbStats, setDbStats] = useState({
     totalDonors: 0,
@@ -64,7 +64,6 @@ const AdminDashboardHome = () => {
     ],
   };
 
-  // Optional Chaining (?.) এবং Fallback (|| 0) ব্যবহার করা হয়েছে এরর এড়াতে
   const stats = [
     {
       id: 1,

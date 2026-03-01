@@ -8,8 +8,8 @@ import {
   LayoutDashboard,
   UserPlus,
   LogIn,
-  Sun, // নতুন ইমপোর্ট
-  Moon, // নতুন ইমপোর্ট
+  Sun,
+  Moon,
 } from 'lucide-react';
 import Logo from './Logo';
 import { AuthContext } from '../../providers/AuthProvider';
@@ -20,7 +20,7 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { user, logOut } = useContext(AuthContext);
-  const { theme, toggleTheme } = useTheme(); // গ্লোবাল থিম লজিক
+  const { theme, toggleTheme } = useTheme();
 
   const publicLinks = [
     { name: 'Home', path: '/' },
@@ -72,9 +72,7 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Desktop Auth Section & Theme Toggle */}
           <div className="hidden md:flex items-center gap-4">
-            {/* গ্লোবাল থিম টগল বাটন */}
             <button
               onClick={toggleTheme}
               className="p-2 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-yellow-400 border border-gray-200 dark:border-slate-700 hover:ring-2 ring-red-200 transition-all cursor-pointer"
@@ -148,9 +146,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Section */}
           <div className="md:hidden flex items-center gap-3">
-            {/* মোবাইল মোডেও থিম টগল */}
             <button
               onClick={toggleTheme}
               className="p-2 text-gray-600 dark:text-yellow-400"
@@ -188,7 +184,6 @@ const Navbar = () => {
               </NavLink>
             ))}
           </div>
-          {/* ... বাকি মোবাইল কন্টেন্ট আপনার আগের কোডের মতই থাকবে ... */}
         </div>
       )}
     </nav>

@@ -45,7 +45,6 @@ const Gallery = () => {
     },
   ];
 
-  // ইমেজ ডাউনলোড ফাংশন
   const handleDownload = (imageUrl, title) => {
     fetch(imageUrl)
       .then((response) => response.blob())
