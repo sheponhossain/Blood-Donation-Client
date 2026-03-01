@@ -38,10 +38,10 @@ const SuccessStories = () => {
   }, [stories.length]);
 
   return (
-    <section className="py-20 md:py-24 max-w-full overflow-hidden transition-colors duration-500">
+    <section className=" max-w-full overflow-hidden transition-colors duration-500">
       {/* Header */}
       <div className="text-center mb-12 md:mb-16 px-6">
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none">
+        <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none">
           Hero <span className="text-red-600">Stories</span>
         </h2>
       </div>
@@ -51,9 +51,6 @@ const SuccessStories = () => {
         <div
           className="flex transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
           style={{
-            /* Mobile: কার্ড উইডথ ৮৫%, তাই অফসেট হবে (১০০-৮৫)/২ = ৭.৫%
-               Desktop: কার্ড উইডথ ৩৫%, তাই অফসেট হবে (১০০-৩৫)/২ = ৩২.৫%
-            */
             transform: `translateX(calc(${typeof window !== 'undefined' && window.innerWidth < 768 ? '7.5%' : '32.5%'} - ${currentIndex * (typeof window !== 'undefined' && window.innerWidth < 768 ? 85 : 35)}%))`,
           }}
         >

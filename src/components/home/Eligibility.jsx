@@ -12,7 +12,7 @@ const Eligibility = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24 px-4 md:px-6 max-w-7xl mx-auto overflow-hidden">
+    <section className="px-4 md:px-6 max-w-7xl mx-auto overflow-hidden">
       <div className="bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-16 border border-slate-100 dark:border-slate-800 overflow-hidden relative transition-all duration-500">
         {/* Grid Container */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">

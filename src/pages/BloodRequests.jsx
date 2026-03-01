@@ -76,10 +76,8 @@ const BloodRequests = () => {
   }
 
   return (
-    // ৩. মেইন কন্টেইনারে dark:bg-slate-950 যোগ করা হয়েছে
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 py-16 px-4 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
-        {/* Modern Header Section */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-full mb-6">
             <span className="relative flex h-2 w-2">
@@ -102,11 +100,10 @@ const BloodRequests = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {requests.map((req) => (
             <div
               key={req._id}
-              // কার্ডে dark:bg-slate-900 এবং dark:border-slate-800 যোগ করা হয়েছে
               className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:shadow-red-200/30 dark:hover:shadow-red-900/10 transition-all duration-500 group relative overflow-hidden"
             >
               <div className="p-6 flex justify-between items-start">

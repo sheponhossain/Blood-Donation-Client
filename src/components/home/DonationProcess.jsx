@@ -31,10 +31,10 @@ const DonationProcess = () => {
   ];
 
   return (
-    <section className="py-24 px-4 md:px-6 max-w-7xl mx-auto overflow-hidden">
+    <section className="px-2 md:px-6 max-w-7xl mx-auto overflow-hidden">
       {/* Header */}
       <div className="flex flex-col items-center text-center mb-16 md:mb-24">
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none">
+        <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white uppercase  tracking-tighter leading-none">
           How It <span className="text-red-600">Works</span>
         </h2>
         <p className="mt-4 text-slate-500 dark:text-slate-400 font-bold max-w-xl text-sm md:text-base px-4">
@@ -84,7 +84,7 @@ const DonationProcess = () => {
       </div>
 
       {/* CTA Button */}
-      <div className="mt-16 md:mt-24 text-center">
+      <div className="mt-8 md:mt-8 text-center">
         <button className="px-8 py-3 md:px-10 md:py-4 bg-slate-900 dark:bg-red-600 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all">
           Start Your Journey Now
         </button>

@@ -31,7 +31,7 @@ const ContactUs = () => {
   };
 
   return (
-    <section className="py-24 bg-white dark:bg-slate-950 transition-colors duration-500 overflow-hidden">
+    <section className=" py-4 bg-white dark:bg-slate-950 transition-colors duration-500 overflow-hidden">
       <div className="container mx-auto px-6 max-w-7xl">
         {/* --- Section Header --- */}
         <motion.div
@@ -40,7 +40,7 @@ const ContactUs = () => {
           viewport={{ once: true }}
           className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">
+          <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">
             Contact <span className="text-red-600">Us</span>
           </h2>
           <p className="mt-4 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.3em] text-xs md:text-sm">
@@ -135,7 +135,7 @@ const ContactUs = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="md:col-span-2 w-full md:w-auto px-12 py-5 bg-slate-900 dark:bg-red-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl flex items-center justify-center gap-3 transition-colors hover:bg-red-600 dark:hover:bg-white dark:hover:text-slate-900"
+                className="md:col-span-2 cursor-pointer w-full md:w-auto px-12 py-5 bg-slate-900 dark:bg-red-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl flex items-center justify-center gap-3 transition-colors hover:bg-red-600 dark:hover:bg-white dark:hover:text-slate-900"
               >
                 Send Message <ArrowRight size={18} />
               </motion.button>

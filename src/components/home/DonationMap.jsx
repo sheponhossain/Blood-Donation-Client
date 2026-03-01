@@ -6,16 +6,10 @@ const DonationMap = () => {
     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.270395352675!2d90.4125181!3d23.810332!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c7a0f70deb73%3A0x30c3642c3d0973b4!2sDhaka!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd';
 
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto transition-colors duration-500">
-      {/* Light Mode: bg-white + border-slate-100 
-         Dark Mode: bg-slate-900 
-      */}
+    <section className="px-6 max-w-7xl mx-auto transition-colors duration-500">
       <div className="bg-white dark:bg-slate-900 rounded-[4rem] p-8 md:p-16 text-slate-900 dark:text-white relative overflow-hidden shadow-2xl border border-slate-100 dark:border-white/5 transition-all duration-500">
-        {/* Background Glow - Only visible in Dark Mode */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/10 blur-[120px] rounded-full -mr-48 -mt-48 pointer-events-none hidden dark:block"></div>
-
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Side: Info */}
           <div className="lg:col-span-5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 dark:bg-red-600/20 text-red-600 dark:text-red-500 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
               <Activity size={12} className="animate-pulse" /> Live Status

@@ -23,9 +23,9 @@ const FAQ = () => {
   ];
 
   return (
-    <section className="py-24 px-6 max-w-3xl mx-auto">
+    <section className="px-6 max-w-3xl mx-auto">
       <div className="mb-12">
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+        <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
           Frequently asked <span className="text-red-600">questions</span>
         </h2>
         <div className="h-1 w-12 bg-red-600 rounded-full"></div>
